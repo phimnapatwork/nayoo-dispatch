@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>น่าอยู่ — แจ้งบัคและแจ้งงาน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f6f9;
+    --bg-panel:#ffffff;
+    --bg-field:#f0f2f6;
+    --ink:#1c2430;
+    --ink-dim:#5c6674;
+    --ink-faint:#98a1af;
+    --line:#e1e5eb;
+    --amber:#c9791a;
+    --amber-dim:#fbebd5;
+    --teal:#0e9488;
+    --teal-dim:#dff3ef;
+    --red:#d64550;
+    --font-display:'Sarabun',sans-serif;
+    --font-mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(14,148,136,0.05), transparent 40%),
+      radial-gradient(circle at 85% 100%, rgba(201,121,26,0.05), transparent 40%),
+      var(--bg);
+    color:var(--ink);
+    font-family:var(--font-display);
+    min-height:100vh;
+    padding:32px 16px 64px;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+
+  .topbar{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:8px;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal);}
+  .brand h1{font-size:17px;font-weight:600;letter-spacing:0.02em;margin:0;}
+  .brand span{color:var(--ink-dim);font-size:13px;}
+  .clock{font-family:var(--font-mono);color:var(--ink-faint);font-size:12px;}
+
+  .topbar-right{display:flex;align-items:center;gap:14px;}
+  .settings-btn{
+    font-family:var(--font-mono);font-size:11.5px;color:var(--ink-dim);
+    background:var(--bg-panel);border:1px solid var(--line);border-radius:7px;
+    padding:6px 10px;cursor:pointer;letter-spacing:0.03em;
+  }
+  .settings-btn:hover{border-color:var(--teal);color:var(--teal);}
+
+  .settings-panel{
+    display:none;background:var(--bg-panel);border:1px solid var(--line);
+    border-radius:12px;padding:18px 20px;margin-bottom:20px;
+  }
+  .settings-panel.show{display:block;}
+  .settings-title{font-size:13.5px;font-weight:600;margin-bottom:6px;}
+  .settings-desc{font-size:12px;color:var(--ink-faint);line-height:1.6;margin-bottom:12px;}
+  .settings-panel input{
+    width:100%;background:var(--bg-field);border:1px solid var(--line);
+    border-radius:8px;padding:9px 12px;color:var(--ink);font-family:var(--font-mono);
+    font-size:12.5px;outline:none;
+  }
+  .settings-panel input:focus{border-color:var(--teal);}
+  .settings-row{display:flex;align-items:center;gap:12px;margin-top:10px;}
+  .settings-save{
+    padding:8px 16px;border-radius:8px;border:1px solid var(--teal);
+    background:var(--teal-dim);color:var(--teal);font-weight:600;font-size:12.5px;
+    cursor:pointer;font-family:var(--font-display);
+  }
+  .settings-status{font-size:12px;color:var(--ink-faint);}
+
+  .setup-banner{
+    display:none;background:var(--amber-dim);border:1px solid var(--amber);
+    border-radius:10px;padding:12px 16px;margin-bottom:20px;cursor:pointer;
+    font-size:13.5px;font-weight:600;color:#8a5510;text-align:center;
+  }
+  .setup-banner.show{display:block;}
+  .setup-banner:hover{filter:brightness(0.97);}
+
+  .grid{display:grid;grid-template-columns:1.15fr 0.85fr;gap:22px;align-items:start;}
+  @media (max-width:760px){.grid{grid-template-columns:1fr;}}
+
+  /* ---- form panel ---- */
+  .panel{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:26px;
+    box-shadow:0 1px 3px rgba(28,36,48,0.04), 0 8px 24px rgba(28,36,48,0.05);
+  }
+  .field{margin-bottom:20px;}
+  .field label{
+    display:block;font-size:12.5px;color:var(--ink-dim);
+    margin-bottom:8px;font-weight:600;letter-spacing:0.01em;
+  }
+  .field label .req{color:var(--red);margin-left:2px;}
+  input[type=text], textarea, select{
+    width:100%;background:var(--bg-field);border:1px solid var(--line);
+    border-radius:9px;padding:11px 13px;color:var(--ink);font-family:var(--font-display);
+    font-size:14.5px;outline:none;transition:border-color .15s ease;
+  }
+  input[type=text]:focus, textarea:focus, select:focus{border-color:var(--teal);}
+  textarea{resize:vertical;min-height:78px;line-height:1.5;}
+
+  .seg{display:flex;gap:8px;}
+  .seg button{
+    flex:1;padding:11px 10px;border-radius:9px;border:1px solid var(--line);
+    background:var(--bg-field);color:var(--ink-dim);font-family:var(--font-display);
+    font-size:14px;font-weight:600;cursor:pointer;transition:all .15s ease;
+  }
+  .seg button.active[data-v="bug"]{background:var(--amber-dim);border-color:var(--amber);color:var(--amber);}
+  .seg button.active[data-v="task"]{background:var(--teal-dim);border-color:var(--teal);color:var(--teal);}
+
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:480px){.row2{grid-template-columns:1fr;}}
+
+  .chips{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip{
+    padding:8px 14px;border-radius:999px;border:1px solid var(--line);
+    background:var(--bg-field);color:var(--ink-dim);font-size:13px;font-weight:600;
+    cursor:pointer;transition:all .15s ease;font-family:var(--font-mono);
+  }
+  .chip.active{color:#ffffff;}
+  .chip[data-p="1"].active{background:var(--red);border-color:var(--red);}
+  .chip[data-p="2"].active{background:var(--amber);border-color:var(--amber);}
+  .chip[data-p="3"].active{background:var(--teal);border-color:var(--teal);}
+  .chip[data-p="4"].active{background:var(--ink-faint);border-color:var(--ink-faint);}
+
+  .bugfields{display:none;}
+  .bugfields.show{display:block;}
+
+  .caseid-line{
+    margin-top:10px;font-family:var(--font-mono);font-size:12.5px;
+    color:var(--ink-faint);display:none;
+  }
+  .caseid-line.show{display:block;}
+  .caseid-line span{color:var(--amber);font-weight:600;}
+
+  .dropzone{
+    border:1.5px dashed var(--line);border-radius:10px;padding:20px 16px;
+    text-align:center;cursor:pointer;background:var(--bg-field);
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .dropzone:hover, .dropzone.dragover{border-color:var(--teal);background:var(--teal-dim);}
+  .dropzone-text{font-size:13.5px;font-weight:600;color:var(--ink-dim);}
+  .dropzone-hint{font-size:11.5px;color:var(--ink-faint);margin-top:5px;}
+
+  .thumbs{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
+  .thumb{
+    position:relative;width:74px;height:74px;border-radius:9px;overflow:hidden;
+    border:1px solid var(--line);background:var(--bg-field);
+  }
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .thumb-remove{
+    position:absolute;top:3px;right:3px;width:19px;height:19px;border-radius:50%;
+    background:rgba(28,36,48,0.75);color:#fff;border:none;cursor:pointer;
+    font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center;
+  }
+  .thumb-remove:hover{background:var(--red);}
+  .thumb-name{
+    position:absolute;bottom:0;left:0;right:0;background:rgba(28,36,48,0.7);
+    color:#fff;font-size:9px;padding:2px 4px;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;
+  }
+
+  .submit-btn{
+    width:100%;padding:14px;border-radius:10px;border:none;margin-top:6px;
+    background:var(--teal);color:#ffffff;font-weight:700;font-size:15px;
+    cursor:pointer;transition:transform .1s ease, opacity .15s ease;
+    font-family:var(--font-display);
+  }
+  .submit-btn:active{transform:scale(0.99);}
+  .submit-btn:disabled{opacity:0.55;cursor:not-allowed;}
+  .submit-btn.bug-mode{background:var(--amber);}
+
+  .err{
+    display:none;margin-top:12px;padding:11px 13px;border-radius:9px;
+    background:rgba(214,69,80,0.08);border:1px solid rgba(214,69,80,0.35);
+    color:#a5222c;font-size:13px;white-space:pre-wrap;
+  }
+
+  /* ---- ticket stub ---- */
+  .ticket{
+    position:sticky;top:24px;background:var(--bg-panel);border:1px solid var(--line);
+    border-radius:16px;overflow:hidden;
+    box-shadow:0 1px 3px rgba(28,36,48,0.04), 0 8px 24px rgba(28,36,48,0.06);
+    transition:box-shadow .25s ease;
+  }
+  .ticket::before,.ticket::after{
+    content:'';position:absolute;width:22px;height:22px;border-radius:50%;
+    background:var(--bg);top:128px;z-index:2;
+  }
+  .ticket::before{left:-11px;}
+  .ticket::after{right:-11px;}
+  .ticket-head{
+    padding:20px 22px 16px;
+    border-bottom:1px dashed var(--line);
+  }
+  .ticket-kind{
+    font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;
+    color:var(--ink-faint);text-transform:uppercase;margin-bottom:6px;
+  }
+  .ticket-id{
+    font-family:var(--font-mono);font-size:22px;font-weight:600;letter-spacing:0.02em;
+  }
+  .ticket-id.bug{color:var(--amber);}
+  .ticket-id.task{color:var(--teal);}
+  .ticket-body{padding:18px 22px 22px;}
+  .ticket-title{font-size:15px;font-weight:600;margin-bottom:4px;word-break:break-word;}
+  .ticket-title.placeholder{color:var(--ink-faint);font-weight:400;}
+  .ticket-meta{margin-top:14px;display:flex;flex-direction:column;gap:9px;}
+  .ticket-meta-row{display:flex;justify-content:space-between;font-size:12.5px;}
+  .ticket-meta-row .k{color:var(--ink-faint);}
+  .ticket-meta-row .v{color:var(--ink-dim);font-family:var(--font-mono);text-align:right;}
+  .ticket-stamp{
+    margin-top:18px;padding:9px 0;text-align:center;border-radius:8px;
+    font-family:var(--font-mono);font-size:11.5px;letter-spacing:0.14em;
+    border:1px solid var(--line);color:var(--ink-faint);
+  }
+  .ticket-stamp.saved{border-color:var(--teal);color:var(--teal);background:rgba(14,148,136,0.08);}
+  .ticket-link{
+    display:block;margin-top:10px;text-align:center;font-size:13px;
+    color:var(--teal);text-decoration:none;font-weight:600;
+  }
+  .ticket-link:hover{text-decoration:underline;}
+  .reset-link{
+    display:block;text-align:center;margin-top:8px;font-size:12px;color:var(--ink-faint);
+    cursor:pointer;text-decoration:underline;
+  }
+
+  /* ---- success popup ---- */
+  .overlay{
+    display:none;position:fixed;inset:0;background:rgba(28,36,48,0.45);
+    z-index:100;align-items:center;justify-content:center;padding:20px;
+    backdrop-filter:blur(2px);
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    background:var(--bg-panel);border-radius:18px;padding:32px 28px 26px;
+    max-width:380px;width:100%;text-align:center;
+    box-shadow:0 12px 48px rgba(28,36,48,0.22);
+    animation:pop .22s ease-out;
+  }
+  @keyframes pop{
+    from{opacity:0;transform:scale(0.94) translateY(8px);}
+    to{opacity:1;transform:scale(1) translateY(0);}
+  }
+  .modal-check{
+    width:56px;height:56px;border-radius:50%;margin:0 auto 16px;
+    background:var(--teal-dim);color:var(--teal);
+    display:flex;align-items:center;justify-content:center;font-size:30px;
+  }
+  .modal-title{font-size:18px;font-weight:700;margin-bottom:6px;}
+  .modal-sub{font-size:13px;color:var(--ink-dim);margin-bottom:20px;}
+  .modal-case{
+    background:var(--bg-field);border:1px solid var(--line);border-radius:10px;
+    padding:14px;margin-bottom:18px;
+  }
+  .modal-case-label{
+    font-size:11px;color:var(--ink-faint);letter-spacing:0.08em;
+    text-transform:uppercase;margin-bottom:5px;font-family:var(--font-mono);
+  }
+  .modal-case-value{
+    font-family:var(--font-mono);font-size:20px;font-weight:600;color:var(--amber);
+    word-break:break-all;
+  }
+  .modal-actions{display:flex;flex-direction:column;gap:9px;}
+  .modal-btn{
+    padding:12px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;
+    font-family:var(--font-display);border:none;text-decoration:none;display:block;
+  }
+  .modal-btn.primary{background:var(--teal);color:#fff;}
+  .modal-btn.ghost{
+    background:transparent;color:var(--ink-dim);border:1px solid var(--line);
+  }
+  .modal-btn.ghost:hover{border-color:var(--teal);color:var(--teal);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="dot" id="statusDot"></div>
+      <div>
+        <h1>น่าอยู่ <span>— แจ้งบัคและแจ้งงาน</span></h1>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="clock" id="clock"></div>
+      <button class="settings-btn" id="settingsBtn" onclick="toggleSettings()" title="ตั้งค่า Relay">⚙︎ ตั้งค่า</button>
+    </div>
+  </div>
+
+  <div class="setup-banner" id="setupBanner" onclick="toggleSettings(true)">
+    <span>⚠️ ไม่พบ Relay URL — คลิกตรงนี้เพื่อใส่เอง</span>
+  </div>
+
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-title">Relay URL (ปกติไม่ต้องตั้งค่าเอง)</div>
+    <div class="settings-desc">
+      หน้านี้เชื่อมกับ Relay ที่ตั้งไว้ในโค้ดโดยอัตโนมัติ ไม่ต้องตั้งค่าอะไรเพิ่ม —
+      ช่องนี้มีไว้เผื่อกรณีพิเศษที่ต้องการชี้ไปยัง Relay อื่น
+    </div>
+    <input type="text" id="relayUrl" placeholder="https://script.google.com/macros/s/.../exec">
+    <div class="settings-row">
+      <button class="settings-save" onclick="saveRelayUrl()">บันทึก URL</button>
+      <button class="settings-save" onclick="resetRelayUrl()" style="border-color:var(--line);background:var(--bg-field);color:var(--ink-dim);">คืนค่าเริ่มต้น</button>
+      <span class="settings-status" id="relayStatus"></span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- FORM -->
+    <div class="panel">
+      <div class="field">
+        <label>ประเภท<span class="req">*</span></label>
+        <div class="seg">
+          <button type="button" data-v="bug" class="active">🐛 Bug</button>
+          <button type="button" data-v="task">📋 งาน (Task)</button>
+        </div>
+        <div class="caseid-line" id="caseIdLine">เลข Case: <span id="caseIdValue">—</span></div>
+      </div>
+
+      <div class="field">
+        <label>โปรดักส์<span class="req">*</span></label>
+        <select id="product">
+          <option value="nayoo">NaYoo</option>
+          <option value="baanprompt">Baan Prompt</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>หัวข้อ<span class="req">*</span></label>
+        <input type="text" id="title" placeholder="เช่น หน้ารายละเอียดประกาศโหลดรูปไม่ขึ้นบนมือถือ">
+      </div>
+
+      <div class="field">
+        <label>รายละเอียด<span class="req">*</span></label>
+        <textarea id="desc" placeholder="อธิบายสิ่งที่พบ / สิ่งที่ต้องทำ"></textarea>
+      </div>
+
+      <div class="bugfields" id="bugFields">
+        <div class="field">
+          <label>ขั้นตอนที่ทำให้เกิด (Steps to reproduce)</label>
+          <textarea id="steps" placeholder="1) เข้าหน้า...&#10;2) กด...&#10;3) เจอ..."></textarea>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>ผลที่ควรเป็น (Expected)</label>
+            <input type="text" id="expected" placeholder="ควรจะ...">
+          </div>
+          <div class="field">
+            <label>ผลที่เกิดจริง (Actual)</label>
+            <input type="text" id="actual" placeholder="แต่กลับ...">
+          </div>
+        </div>
+      </div>
+
+      <div class="field" id="priorityField">
+        <label>ความสำคัญ<span class="req">*</span></label>
+        <div class="chips">
+          <div class="chip" data-p="1">Urgent</div>
+          <div class="chip active" data-p="2">High</div>
+          <div class="chip" data-p="3">Normal</div>
+          <div class="chip" data-p="4">Low</div>
+        </div>
+      </div>
+
+      <div class="field" id="impactField">
+        <label>ผลกระทบ<span class="req">*</span></label>
+        <textarea id="impactDesc" placeholder="อธิบายผลกระทบ เช่น กระทบกี่คน / ทีมไหน / ระบบไหน"></textarea>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label>ผู้แจ้ง<span class="req">*</span></label>
+          <input type="text" id="reporter" placeholder="ชื่อผู้แจ้ง">
+        </div>
+        <div class="field">
+          <label>ลิงก์แนบ (ถ้ามี)</label>
+          <input type="text" id="linkAttach" placeholder="ลิงก์รูป/แชท LINE/Drive">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>แนบรูป (ถ้ามี)</label>
+        <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+          <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" onchange="handleFiles(this.files)">
+          <div class="dropzone-text">คลิกเพื่อเลือกรูป หรือลากรูปมาวางตรงนี้</div>
+          <div class="dropzone-hint">รองรับ JPG / PNG / GIF — สูงสุด 3 ไฟล์ ไฟล์ละไม่เกิน 8 MB</div>
+        </div>
+        <div class="thumbs" id="thumbs"></div>
+      </div>
+
+      <button class="submit-btn" id="submitBtn" onclick="submitTicket()">บันทึกงาน</button>
+      <div class="err" id="errBox"></div>
+    </div>
+
+    <!-- TICKET PREVIEW -->
+    <div class="ticket" id="ticket">
+      <div class="ticket-head">
+        <div class="ticket-kind" id="ticketKind">BUG REPORT — NAYOO</div>
+        <div class="ticket-id bug" id="ticketId">—</div>
+      </div>
+      <div class="ticket-body">
+        <div class="ticket-title placeholder" id="ticketTitle">รอกรอกหัวข้อ...</div>
+        <div class="ticket-meta">
+          <div class="ticket-meta-row" id="metaPriorityRow"><span class="k">ความสำคัญ</span><span class="v" id="metaPriority">High</span></div>
+          <div class="ticket-meta-row"><span class="k">ผู้แจ้ง</span><span class="v" id="metaReporter">—</span></div>
+          <div class="ticket-meta-row"><span class="k">วันที่</span><span class="v" id="metaDate">—</span></div>
+        </div>
+        <div class="ticket-stamp" id="ticketStamp">รอบันทึก</div>
+        <a class="ticket-link" id="ticketLink" style="display:none;" target="_blank">เปิดดูงาน →</a>
+        <div class="reset-link" id="resetLink" style="display:none;" onclick="resetForm()">แจ้งรายการใหม่</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS POPUP -->
+  <div class="overlay" id="successOverlay">
+    <div class="modal">
+      <div class="modal-check">✓</div>
+      <div class="modal-title" id="modalTitle">แจ้งเรียบร้อยแล้ว</div>
+      <div class="modal-sub" id="modalSub">บันทึกเข้าระบบและแจ้งเตือนเข้ากลุ่ม LINE แล้ว</div>
+
+      <div class="modal-case" id="modalCaseBox">
+        <div class="modal-case-label">เลข Case</div>
+        <div class="modal-case-value" id="modalCaseValue">—</div>
+      </div>
+
+      <div class="modal-actions">
+        <a class="modal-btn primary" id="modalOpenLink" target="_blank" style="display:none;">เปิดดูงาน →</a>
+        <button class="modal-btn ghost" onclick="closeSuccess()">แจ้งรายการใหม่</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* ============================================================
+     ⬇️ ใส่ Web app URL ของ Apps Script ตรงนี้ (ลงท้ายด้วย /exec)
+     ============================================================ */
+  const RELAY_URL_DEFAULT = 'https://script.google.com/macros/s/XXXXXXXXXXXXXXXX/exec';
+
+  let relayUrl = RELAY_URL_DEFAULT;
+
+  function updateSetupBanner(){
+    document.getElementById('setupBanner').classList.toggle('show', !relayUrl);
+  }
+
+  function loadRelayUrl(){
+    try{
+      const val = localStorage.getItem('dispatch_relay_url');
+      if(val){ relayUrl = val; }
+    }catch(e){}
+    document.getElementById('relayUrl').value = relayUrl || '';
+    updateSetupBanner();
+  }
+
+  function toggleSettings(forceOpen){
+    const panel = document.getElementById('settingsPanel');
+    if(forceOpen){ panel.classList.add('show'); }
+    else{ panel.classList.toggle('show'); }
+    if(panel.classList.contains('show')){
+      document.getElementById('relayUrl').focus();
+    }
+  }
+
+  function saveRelayUrl(){
+    const val = document.getElementById('relayUrl').value.trim();
+    const statusEl = document.getElementById('relayStatus');
+    try{
+      if(val){
+        localStorage.setItem('dispatch_relay_url', val);
+        relayUrl = val;
+        statusEl.textContent = 'บันทึกแล้ว ✓';
+      }else{
+        localStorage.removeItem('dispatch_relay_url');
+        relayUrl = RELAY_URL_DEFAULT;
+        document.getElementById('relayUrl').value = relayUrl;
+        statusEl.textContent = 'คืนค่าเริ่มต้นแล้ว';
+      }
+      updateSetupBanner();
+    }catch(e){
+      statusEl.textContent = 'บันทึกไม่สำเร็จ';
+    }
+  }
+
+  function resetRelayUrl(){
+    try{ localStorage.removeItem('dispatch_relay_url'); }catch(e){}
+    relayUrl = RELAY_URL_DEFAULT;
+    document.getElementById('relayUrl').value = relayUrl;
+    document.getElementById('relayStatus').textContent = 'คืนค่าเริ่มต้นแล้ว';
+    updateSetupBanner();
+  }
+
+  loadRelayUrl();
+
+  // ---- clock ----
+  function tick(){
+    const d = new Date();
+    document.getElementById('clock').textContent =
+      d.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'}) + '  ' +
+      d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  }
+  tick(); setInterval(tick,30000);
+
+  // ---- state ----
+  let type = 'bug';
+  let priority = 2;
+  let submitting = false;
+
+  const LIST_IDS = {
+    bug: '901615638489',   // SLA 2026
+    task: '901616215014'   // แจ้งงาน (Task Request)
+  };
+  const PRODUCT_LABEL = { nayoo:'NAYOO', baanprompt:'BAANPROMPT' };
+  const PRODUCT_CODE = { nayoo:'NY', baanprompt:'BP' };
+  const PRIORITY_LABEL = { 1:'Urgent', 2:'High', 3:'Normal', 4:'Low' };
+
+  let currentCaseId = null;
+
+  function casePrefix(product){
+    const now = new Date();
+    const yy = String(now.getFullYear()).slice(-2);
+    const mm = String(now.getMonth()+1).padStart(2,'0');
+    const dd = String(now.getDate()).padStart(2,'0');
+    return PRODUCT_CODE[product] + yy + mm + dd;
+  }
+
+  function refreshCaseId(){
+    const product = document.getElementById('product').value;
+    document.getElementById('caseIdLine').classList.toggle('show', type==='bug');
+    if(type === 'bug'){
+      currentCaseId = null;
+      document.getElementById('caseIdValue').textContent = casePrefix(product) + '-••••';
+    }else{
+      document.getElementById('caseIdValue').textContent = '—';
+    }
+  }
+
+  // ---- type toggle ----
+  document.querySelectorAll('.seg button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.seg button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      type = btn.dataset.v;
+      document.getElementById('bugFields').classList.toggle('show', type==='bug');
+      document.getElementById('submitBtn').classList.toggle('bug-mode', type==='bug');
+      document.getElementById('priorityField').style.display = type==='bug' ? 'none' : 'block';
+      document.getElementById('impactField').style.display = type==='bug' ? 'none' : 'block';
+      refreshCaseId();
+      updateTicket();
+    });
+  });
+
+  // ---- priority chips ----
+  document.querySelectorAll('#priorityField .chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      document.querySelectorAll('#priorityField .chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      priority = parseInt(chip.dataset.p);
+      updateTicket();
+    });
+  });
+
+  // ---- live ticket preview ----
+  ['title','reporter'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', updateTicket);
+  });
+  document.getElementById('product').addEventListener('change', ()=>{
+    refreshCaseId();
+    updateTicket();
+  });
+
+  function updateTicket(){
+    const product = document.getElementById('product').value;
+    const title = document.getElementById('title').value.trim();
+    const reporter = document.getElementById('reporter').value.trim();
+
+    document.getElementById('ticketKind').textContent =
+      (type==='bug' ? 'BUG REPORT' : 'TASK REQUEST') + ' — ' + PRODUCT_LABEL[product];
+
+    const idEl = document.getElementById('ticketId');
+    idEl.textContent = type==='bug' ? (currentCaseId || (casePrefix(product) + '-••••')) : (PRODUCT_CODE[product] + '-TASK');
+    idEl.className = 'ticket-id ' + type;
+
+    const titleEl = document.getElementById('ticketTitle');
+    titleEl.textContent = title || 'รอกรอกหัวข้อ...';
+    titleEl.classList.toggle('placeholder', !title);
+
+    document.getElementById('metaPriorityRow').style.display = type==='bug' ? 'none' : 'flex';
+    document.getElementById('metaPriority').textContent = PRIORITY_LABEL[priority];
+    document.getElementById('metaReporter').textContent = reporter || '—';
+    document.getElementById('metaDate').textContent = new Date().toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});
+  }
+  document.getElementById('priorityField').style.display = type==='bug' ? 'none' : 'block';
+  document.getElementById('impactField').style.display = type==='bug' ? 'none' : 'block';
+  refreshCaseId();
+  updateTicket();
+
+  // ---- image attachments ----
+  // หมายเหตุ: ไฟล์ถูกส่งไปพร้อม request เดียวในรูป base64 ซึ่งโตขึ้น ~33%
+  // Apps Script รับ POST ได้ราว 50MB จึงจำกัดไว้ที่ 3 ไฟล์ × 8MB
+  const MAX_FILES = 3;
+  const MAX_SIZE = 8 * 1024 * 1024;
+  let attachments = [];
+
+  function handleFiles(fileList){
+    hideError();
+    const files = Array.from(fileList);
+
+    for(const file of files){
+      if(attachments.length >= MAX_FILES){
+        showError(`แนบได้สูงสุด ${MAX_FILES} ไฟล์`);
+        break;
+      }
+      if(!file.type.startsWith('image/')){
+        showError(`"${file.name}" ไม่ใช่ไฟล์รูป — ข้ามไฟล์นี้`);
+        continue;
+      }
+      if(file.size > MAX_SIZE){
+        showError(`"${file.name}" ใหญ่เกิน 8 MB — ข้ามไฟล์นี้`);
+        continue;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e)=>{
+        const dataUrl = e.target.result;
+        attachments.push({
+          name: file.name,
+          mimeType: file.type,
+          data: dataUrl.split(',')[1],
+          preview: dataUrl
+        });
+        renderThumbs();
+      };
+      reader.readAsDataURL(file);
+    }
+    document.getElementById('fileInput').value = '';
+  }
+
+  function renderThumbs(){
+    const box = document.getElementById('thumbs');
+    box.innerHTML = '';
+    attachments.forEach((att, i)=>{
+      const div = document.createElement('div');
+      div.className = 'thumb';
+
+      const img = document.createElement('img');
+      img.src = att.preview;
+      div.appendChild(img);
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'thumb-name';
+      nameEl.textContent = att.name;
+      div.appendChild(nameEl);
+
+      const btn = document.createElement('button');
+      btn.className = 'thumb-remove';
+      btn.textContent = '×';
+      btn.onclick = (ev)=>{ ev.stopPropagation(); attachments.splice(i,1); renderThumbs(); };
+      div.appendChild(btn);
+
+      box.appendChild(div);
+    });
+  }
+
+  // drag and drop
+  (function(){
+    const dz = document.getElementById('dropzone');
+    ['dragenter','dragover'].forEach(evt=>{
+      dz.addEventListener(evt, (e)=>{ e.preventDefault(); dz.classList.add('dragover'); });
+    });
+    ['dragleave','drop'].forEach(evt=>{
+      dz.addEventListener(evt, (e)=>{ e.preventDefault(); dz.classList.remove('dragover'); });
+    });
+    dz.addEventListener('drop', (e)=>{
+      if(e.dataTransfer && e.dataTransfer.files) handleFiles(e.dataTransfer.files);
+    });
+  })();
+
+  function showError(msg){
+    const box = document.getElementById('errBox');
+    box.textContent = msg;
+    box.style.display = 'block';
+  }
+  function hideError(){
+    document.getElementById('errBox').style.display = 'none';
+  }
+
+  function endSubmitting(){
+    submitting = false;
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = false;
+    btn.textContent = 'บันทึกงาน';
+    document.getElementById('ticketStamp').textContent = 'รอบันทึก';
+  }
+
+  async function submitTicket(){
+    if(submitting) return;
+    hideError();
+
+    const product = document.getElementById('product').value;
+    const title = document.getElementById('title').value.trim();
+    const desc = document.getElementById('desc').value.trim();
+    const reporter = document.getElementById('reporter').value.trim();
+    const link = document.getElementById('linkAttach').value.trim();
+    const steps = document.getElementById('steps').value.trim();
+    const expected = document.getElementById('expected').value.trim();
+    const actual = document.getElementById('actual').value.trim();
+    const impactDesc = document.getElementById('impactDesc').value.trim();
+
+    if(!title || !desc || !reporter){
+      showError('กรุณากรอกหัวข้อ รายละเอียด และผู้แจ้ง ให้ครบก่อนส่ง');
+      return;
+    }
+    if(type==='task' && !impactDesc){
+      showError('กรุณากรอกผลกระทบก่อนส่ง');
+      return;
+    }
+    if(!relayUrl){
+      showError('ยังไม่ได้ตั้งค่า Relay URL — กดปุ่ม ⚙︎ ตั้งค่า มุมขวาบนก่อน');
+      return;
+    }
+
+    submitting = true;
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'กำลังบันทึกงาน...';
+    document.getElementById('ticketStamp').textContent = 'กำลังบันทึก...';
+
+    let fullDesc = `**รายละเอียด**\n${desc}\n\n**แจ้งโดย:** ${reporter}\n**วันที่แจ้ง:** ${new Date().toLocaleDateString('th-TH')}`;
+    if(type==='bug'){
+      if(steps) fullDesc += `\n\n**ขั้นตอนที่ทำให้เกิด**\n${steps}`;
+      if(expected) fullDesc += `\n\n**ผลที่ควรเป็น:** ${expected}`;
+      if(actual) fullDesc += `\n\n**ผลที่เกิดจริง:** ${actual}`;
+    }
+    if(type==='task'){
+      fullDesc += `\n\n**ผลกระทบ:** ${impactDesc}`;
+    }
+    if(link) fullDesc += `\n\n**ลิงก์แนบ:** ${link}`;
+
+    const requestPayload = {
+      action: 'create_task',
+      list_id: LIST_IDS[type],
+      type: type,
+      product: product,
+      title: title,
+      description: fullDesc,
+      priority: type==='bug' ? undefined : priority,
+      tags: [type==='bug' ? 'bug' : 'feature'],
+      attachments: attachments.map(a => ({ name: a.name, mimeType: a.mimeType, data: a.data })),
+      notify: {
+        type: type,
+        product: product,
+        title: title,
+        priority_label: type==='bug' ? null : PRIORITY_LABEL[priority],
+        impact_desc: type==='task' ? impactDesc : null,
+        reporter: reporter,
+        attachment_count: attachments.length
+      }
+    };
+
+    let result;
+    try{
+      // ใช้ Content-Type: text/plain เพื่อเลี่ยง CORS preflight
+      // (Apps Script ไม่ตอบ OPTIONS request)
+      const resp = await fetch(relayUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(requestPayload)
+      });
+
+      const raw = await resp.text();
+      try{
+        result = JSON.parse(raw);
+      }catch(parseErr){
+        console.error('Relay response not JSON:', raw);
+        showError('Relay ตอบกลับมาในรูปแบบที่อ่านไม่ได้ — ตรวจสอบว่า Deploy เวอร์ชันล่าสุดแล้วหรือยัง');
+        endSubmitting();
+        return;
+      }
+    }catch(networkErr){
+      console.error(networkErr);
+      showError('ส่งคำขอไปที่ Relay ไม่สำเร็จ — ตรวจสอบ Relay URL และการเชื่อมต่ออินเทอร์เน็ต');
+      endSubmitting();
+      return;
+    }
+
+    if(!result.ok){
+      showError('บันทึกไม่สำเร็จ: ' + (result.error || 'ไม่ทราบสาเหตุ'));
+      endSubmitting();
+      return;
+    }
+
+    // ---- สำเร็จ ----
+    currentCaseId = result.case_id || null;
+    const taskUrl = result.task_url || null;
+
+    const stamp = document.getElementById('ticketStamp');
+    stamp.textContent = 'บันทึกแล้ว ✓';
+    stamp.classList.add('saved');
+
+    if(type==='bug' && currentCaseId){
+      document.getElementById('caseIdValue').textContent = currentCaseId;
+      document.getElementById('ticketId').textContent = currentCaseId;
+    }else if(type!=='bug' && result.task_id){
+      document.getElementById('ticketId').textContent = PRODUCT_CODE[product] + '-' + String(result.task_id).toUpperCase();
+    }
+
+    const linkEl = document.getElementById('ticketLink');
+    if(taskUrl){
+      linkEl.href = taskUrl;
+      linkEl.textContent = 'เปิดดูงาน →';
+      linkEl.style.display = 'block';
+    }else{
+      linkEl.style.display = 'none';
+    }
+
+    document.getElementById('resetLink').style.display = 'block';
+    btn.style.display = 'none';
+    submitting = false;
+
+    showSuccess({
+      isBug: type === 'bug',
+      caseId: currentCaseId,
+      taskUrl: taskUrl,
+      failedFiles: result.attachments_failed || []
+    });
+  }
+
+  // ---- success popup ----
+  function showSuccess(info){
+    document.getElementById('modalTitle').textContent =
+      info.isBug ? 'แจ้งบัคเรียบร้อยแล้ว' : 'แจ้งงานเรียบร้อยแล้ว';
+
+    let sub = 'บันทึกเข้าระบบและแจ้งเตือนเข้ากลุ่ม LINE แล้ว';
+    if(info.failedFiles && info.failedFiles.length){
+      sub += `\n⚠️ แนบไฟล์ไม่สำเร็จ: ${info.failedFiles.join(', ')}`;
+    }
+    document.getElementById('modalSub').textContent = sub;
+
+    const caseBox = document.getElementById('modalCaseBox');
+    if(info.isBug && info.caseId){
+      caseBox.style.display = 'block';
+      document.getElementById('modalCaseValue').textContent = info.caseId;
+    }else{
+      caseBox.style.display = 'none';
+    }
+
+    const openLink = document.getElementById('modalOpenLink');
+    if(info.taskUrl){
+      openLink.href = info.taskUrl;
+      openLink.style.display = 'block';
+    }else{
+      openLink.style.display = 'none';
+    }
+
+    document.getElementById('successOverlay').classList.add('show');
+  }
+
+  function closeSuccess(){
+    document.getElementById('successOverlay').classList.remove('show');
+    resetForm();
+  }
+
+  // คลิกพื้นหลังมืดเพื่อปิด popup ได้ด้วย
+  document.getElementById('successOverlay').addEventListener('click', (e)=>{
+    if(e.target.id === 'successOverlay') closeSuccess();
+  });
+
+  function resetForm(){
+    document.getElementById('title').value = '';
+    document.getElementById('desc').value = '';
+    document.getElementById('steps').value = '';
+    document.getElementById('expected').value = '';
+    document.getElementById('actual').value = '';
+    document.getElementById('reporter').value = '';
+    document.getElementById('linkAttach').value = '';
+    document.getElementById('impactDesc').value = '';
+    attachments = [];
+    renderThumbs();
+    document.getElementById('errBox').style.display = 'none';
+
+    const stamp = document.getElementById('ticketStamp');
+    stamp.textContent = 'รอบันทึก';
+    stamp.classList.remove('saved');
+    document.getElementById('ticketLink').style.display = 'none';
+    document.getElementById('resetLink').style.display = 'none';
+
+    const btn = document.getElementById('submitBtn');
+    btn.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'บันทึกงาน';
+
+    refreshCaseId();
+    updateTicket();
+  }
+</script>
+</body>
+</html>
