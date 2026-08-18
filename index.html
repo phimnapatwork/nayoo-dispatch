@@ -129,6 +129,18 @@
   .chip[data-p="2"].active{background:var(--amber);border-color:var(--amber);}
   .chip[data-p="3"].active{background:var(--teal);border-color:var(--teal);}
   .chip[data-p="4"].active{background:var(--ink-faint);border-color:var(--ink-faint);}
+  .chip.locked{opacity:0.45;cursor:not-allowed;}
+
+  /* ---- customer checkbox ---- */
+  .check-row{
+    display:flex;align-items:center;gap:9px;cursor:pointer;
+    font-size:14px;color:var(--ink);font-weight:600;margin:0;
+    background:var(--bg-field);border:1px solid var(--line);
+    border-radius:9px;padding:12px 13px;transition:all .15s ease;
+  }
+  .check-row:hover{border-color:var(--red);}
+  .check-row input{width:17px;height:17px;accent-color:var(--red);cursor:pointer;}
+  .check-row.on{background:rgba(214,69,80,0.07);border-color:var(--red);color:var(--red);}
 
   .bugfields{display:none;}
   .bugfields.show{display:block;}
@@ -212,6 +224,12 @@
   .ticket-body{padding:18px 22px 22px;}
   .ticket-title{font-size:15px;font-weight:600;margin-bottom:4px;word-break:break-word;}
   .ticket-title.placeholder{color:var(--ink-faint);font-weight:400;}
+  .ticket-customer{
+    display:none;margin-top:10px;padding:6px 10px;border-radius:7px;
+    background:rgba(214,69,80,0.09);color:var(--red);
+    font-size:12px;font-weight:700;letter-spacing:0.02em;text-align:center;
+  }
+  .ticket-customer.show{display:block;}
   .ticket-meta{margin-top:14px;display:flex;flex-direction:column;gap:9px;}
   .ticket-meta-row{display:flex;justify-content:space-between;font-size:12.5px;}
   .ticket-meta-row .k{color:var(--ink-faint);}
@@ -255,7 +273,7 @@
     display:flex;align-items:center;justify-content:center;font-size:30px;
   }
   .modal-title{font-size:18px;font-weight:700;margin-bottom:6px;}
-  .modal-sub{font-size:13px;color:var(--ink-dim);margin-bottom:20px;}
+  .modal-sub{font-size:13px;color:var(--ink-dim);margin-bottom:20px;white-space:pre-line;}
   .modal-case{
     background:var(--bg-field);border:1px solid var(--line);border-radius:10px;
     padding:14px;margin-bottom:18px;
@@ -324,6 +342,13 @@
           <button type="button" data-v="task">📋 งาน (Task)</button>
         </div>
         <div class="caseid-line" id="caseIdLine">เลข Case: <span id="caseIdValue">—</span></div>
+      </div>
+
+      <div class="field">
+        <label class="check-row" id="customerRow">
+          <input type="checkbox" id="isCustomer">
+          <span>งานลูกค้า</span>
+        </label>
       </div>
 
       <div class="field">
@@ -409,6 +434,7 @@
       </div>
       <div class="ticket-body">
         <div class="ticket-title placeholder" id="ticketTitle">รอกรอกหัวข้อ...</div>
+        <div class="ticket-customer" id="ticketCustomer">⭐ งานลูกค้า</div>
         <div class="ticket-meta">
           <div class="ticket-meta-row" id="metaPriorityRow"><span class="k">ความสำคัญ</span><span class="v" id="metaPriority">High</span></div>
           <div class="ticket-meta-row"><span class="k">ผู้แจ้ง</span><span class="v" id="metaReporter">—</span></div>
@@ -514,6 +540,7 @@
   // ---- state ----
   let type = 'bug';
   let priority = 2;
+  let isCustomer = false;
   let submitting = false;
 
   const LIST_IDS = {
@@ -553,7 +580,6 @@
       type = btn.dataset.v;
       document.getElementById('bugFields').classList.toggle('show', type==='bug');
       document.getElementById('submitBtn').classList.toggle('bug-mode', type==='bug');
-      document.getElementById('priorityField').style.display = type==='bug' ? 'none' : 'block';
       document.getElementById('impactField').style.display = type==='bug' ? 'none' : 'block';
       refreshCaseId();
       updateTicket();
@@ -563,11 +589,24 @@
   // ---- priority chips ----
   document.querySelectorAll('#priorityField .chip').forEach(chip=>{
     chip.addEventListener('click', ()=>{
+      if(isCustomer) return;   // ล็อกไว้เมื่อเป็นงานลูกค้า
       document.querySelectorAll('#priorityField .chip').forEach(c=>c.classList.remove('active'));
       chip.classList.add('active');
       priority = parseInt(chip.dataset.p);
       updateTicket();
     });
+  });
+
+  // ---- งานลูกค้า → ล็อกเป็น Urgent ----
+  document.getElementById('isCustomer').addEventListener('change', (e)=>{
+    isCustomer = e.target.checked;
+    document.getElementById('customerRow').classList.toggle('on', isCustomer);
+    if(isCustomer){ priority = 1; }
+    document.querySelectorAll('#priorityField .chip').forEach(c=>{
+      c.classList.toggle('locked', isCustomer);
+      if(isCustomer) c.classList.toggle('active', c.dataset.p === '1');
+    });
+    updateTicket();
   });
 
   // ---- live ticket preview ----
@@ -595,12 +634,17 @@
     titleEl.textContent = title || 'รอกรอกหัวข้อ...';
     titleEl.classList.toggle('placeholder', !title);
 
-    document.getElementById('metaPriorityRow').style.display = type==='bug' ? 'none' : 'flex';
+    document.getElementById('ticketCustomer').classList.toggle('show', isCustomer);
+
+    // งานลูกค้าให้โชว์ความสำคัญเสมอ แม้เป็น Bug
+    const showPriority = isCustomer || type !== 'bug';
+    document.getElementById('priorityField').style.display = showPriority ? 'block' : 'none';
+    document.getElementById('metaPriorityRow').style.display = showPriority ? 'flex' : 'none';
+
     document.getElementById('metaPriority').textContent = PRIORITY_LABEL[priority];
     document.getElementById('metaReporter').textContent = reporter || '—';
     document.getElementById('metaDate').textContent = new Date().toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});
   }
-  document.getElementById('priorityField').style.display = type==='bug' ? 'none' : 'block';
   document.getElementById('impactField').style.display = type==='bug' ? 'none' : 'block';
   refreshCaseId();
   updateTicket();
@@ -737,6 +781,9 @@
     document.getElementById('ticketStamp').textContent = 'กำลังบันทึก...';
 
     let fullDesc = `**รายละเอียด**\n${desc}\n\n**แจ้งโดย:** ${reporter}\n**วันที่แจ้ง:** ${new Date().toLocaleDateString('th-TH')}`;
+    if(isCustomer){
+      fullDesc = `**⭐ งานลูกค้า**\n\n` + fullDesc;
+    }
     if(type==='bug'){
       if(steps) fullDesc += `\n\n**ขั้นตอนที่ทำให้เกิด**\n${steps}`;
       if(expected) fullDesc += `\n\n**ผลที่ควรเป็น:** ${expected}`;
@@ -747,6 +794,8 @@
     }
     if(link) fullDesc += `\n\n**ลิงก์แนบ:** ${link}`;
 
+    const baseTag = type==='bug' ? 'bug' : 'feature';
+
     const requestPayload = {
       action: 'create_task',
       list_id: LIST_IDS[type],
@@ -754,14 +803,16 @@
       product: product,
       title: title,
       description: fullDesc,
-      priority: type==='bug' ? undefined : priority,
-      tags: [type==='bug' ? 'bug' : 'feature'],
+      priority: isCustomer ? 1 : (type==='bug' ? undefined : priority),
+      tags: isCustomer ? [baseTag, 'customer'] : [baseTag],
+      is_customer: isCustomer,
       attachments: attachments.map(a => ({ name: a.name, mimeType: a.mimeType, data: a.data })),
       notify: {
         type: type,
         product: product,
         title: title,
-        priority_label: type==='bug' ? null : PRIORITY_LABEL[priority],
+        priority_label: isCustomer ? 'Urgent' : (type==='bug' ? null : PRIORITY_LABEL[priority]),
+        is_customer: isCustomer,
         impact_desc: type==='task' ? impactDesc : null,
         reporter: reporter,
         attachment_count: attachments.length
@@ -885,6 +936,17 @@
     document.getElementById('reporter').value = '';
     document.getElementById('linkAttach').value = '';
     document.getElementById('impactDesc').value = '';
+
+    // รีเซ็ตงานลูกค้า + ความสำคัญ
+    document.getElementById('isCustomer').checked = false;
+    isCustomer = false;
+    priority = 2;
+    document.getElementById('customerRow').classList.remove('on');
+    document.querySelectorAll('#priorityField .chip').forEach(c=>{
+      c.classList.remove('locked');
+      c.classList.toggle('active', c.dataset.p === '2');
+    });
+
     attachments = [];
     renderThumbs();
     document.getElementById('errBox').style.display = 'none';
@@ -906,4 +968,3 @@
 </script>
 </body>
 </html>
-
