@@ -98,12 +98,13 @@
     margin-bottom:8px;font-weight:600;letter-spacing:0.01em;
   }
   .field label .req{color:var(--red);margin-left:2px;}
-  input[type=text], textarea, select{
+  input[type=text], input[type=date], textarea, select{
     width:100%;background:var(--bg-field);border:1px solid var(--line);
     border-radius:9px;padding:11px 13px;color:var(--ink);font-family:var(--font-display);
     font-size:14.5px;outline:none;transition:border-color .15s ease;
   }
-  input[type=text]:focus, textarea:focus, select:focus{border-color:var(--teal);}
+  input[type=text]:focus, input[type=date]:focus, textarea:focus, select:focus{border-color:var(--teal);}
+  input[type=date]{font-family:var(--font-mono);font-size:14px;}
   textarea{resize:vertical;min-height:78px;line-height:1.5;}
 
   .seg{display:flex;gap:8px;}
@@ -386,6 +387,16 @@
         </div>
       </div>
 
+      <div class="field" id="objectiveField">
+        <label>วัตถุประสงค์<span class="req">*</span></label>
+        <textarea id="objective" placeholder="อยากได้ไปใช้ทำอะไร / ช่วยแก้ปัญหาอะไร"></textarea>
+      </div>
+
+      <div class="field" id="dueDateField">
+        <label>ต้องการภายในวันที่<span class="req">*</span></label>
+        <input type="date" id="dueDate">
+      </div>
+
       <div class="field" id="priorityField">
         <label>ความสำคัญ<span class="req">*</span></label>
         <div class="chips">
@@ -437,6 +448,7 @@
         <div class="ticket-customer" id="ticketCustomer">⭐ งานลูกค้า</div>
         <div class="ticket-meta">
           <div class="ticket-meta-row" id="metaPriorityRow"><span class="k">ความสำคัญ</span><span class="v" id="metaPriority">High</span></div>
+          <div class="ticket-meta-row" id="metaDueRow"><span class="k">ต้องการภายใน</span><span class="v" id="metaDue">—</span></div>
           <div class="ticket-meta-row"><span class="k">ผู้แจ้ง</span><span class="v" id="metaReporter">—</span></div>
           <div class="ticket-meta-row"><span class="k">วันที่</span><span class="v" id="metaDate">—</span></div>
         </div>
@@ -472,7 +484,7 @@
   /* ============================================================
      ⬇️ ใส่ Web app URL ของ Apps Script ตรงนี้ (ลงท้ายด้วย /exec)
      ============================================================ */
-  const RELAY_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbwafi6t3_o0E8QWE7Ctjxe6uuayHiLUhVUz_r1V73NRg66Rv1gtP7xtwhA_jXyx5XI07A/exec';
+  const RELAY_URL_DEFAULT = 'https://script.google.com/macros/s/XXXXXXXXXXXXXXXX/exec';
 
   let relayUrl = RELAY_URL_DEFAULT;
 
@@ -572,6 +584,14 @@
     }
   }
 
+  // ---- แสดง/ซ่อนช่องเฉพาะประเภทงาน ----
+  function refreshTaskFields(){
+    const show = type !== 'bug' ? 'block' : 'none';
+    document.getElementById('impactField').style.display = show;
+    document.getElementById('objectiveField').style.display = show;
+    document.getElementById('dueDateField').style.display = show;
+  }
+
   // ---- type toggle ----
   document.querySelectorAll('.seg button').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -580,7 +600,7 @@
       type = btn.dataset.v;
       document.getElementById('bugFields').classList.toggle('show', type==='bug');
       document.getElementById('submitBtn').classList.toggle('bug-mode', type==='bug');
-      document.getElementById('impactField').style.display = type==='bug' ? 'none' : 'block';
+      refreshTaskFields();
       refreshCaseId();
       updateTicket();
     });
@@ -610,7 +630,7 @@
   });
 
   // ---- live ticket preview ----
-  ['title','reporter'].forEach(id=>{
+  ['title','reporter','dueDate'].forEach(id=>{
     document.getElementById(id).addEventListener('input', updateTicket);
   });
   document.getElementById('product').addEventListener('change', ()=>{
@@ -618,10 +638,18 @@
     updateTicket();
   });
 
+  function formatThaiDate(isoStr){
+    if(!isoStr) return '—';
+    const d = new Date(isoStr + 'T00:00:00');
+    if(isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});
+  }
+
   function updateTicket(){
     const product = document.getElementById('product').value;
     const title = document.getElementById('title').value.trim();
     const reporter = document.getElementById('reporter').value.trim();
+    const dueDate = document.getElementById('dueDate').value;
 
     document.getElementById('ticketKind').textContent =
       (type==='bug' ? 'BUG REPORT' : 'TASK REQUEST') + ' — ' + PRODUCT_LABEL[product];
@@ -641,11 +669,15 @@
     document.getElementById('priorityField').style.display = showPriority ? 'block' : 'none';
     document.getElementById('metaPriorityRow').style.display = showPriority ? 'flex' : 'none';
 
+    // แถวกำหนดส่งโชว์เฉพาะงาน Task
+    document.getElementById('metaDueRow').style.display = type!=='bug' ? 'flex' : 'none';
+    document.getElementById('metaDue').textContent = formatThaiDate(dueDate);
+
     document.getElementById('metaPriority').textContent = PRIORITY_LABEL[priority];
     document.getElementById('metaReporter').textContent = reporter || '—';
     document.getElementById('metaDate').textContent = new Date().toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});
   }
-  document.getElementById('impactField').style.display = type==='bug' ? 'none' : 'block';
+  refreshTaskFields();
   refreshCaseId();
   updateTicket();
 
@@ -760,14 +792,26 @@
     const expected = document.getElementById('expected').value.trim();
     const actual = document.getElementById('actual').value.trim();
     const impactDesc = document.getElementById('impactDesc').value.trim();
+    const objective = document.getElementById('objective').value.trim();
+    const dueDate = document.getElementById('dueDate').value;
 
     if(!title || !desc || !reporter){
       showError('กรุณากรอกหัวข้อ รายละเอียด และผู้แจ้ง ให้ครบก่อนส่ง');
       return;
     }
-    if(type==='task' && !impactDesc){
-      showError('กรุณากรอกผลกระทบก่อนส่ง');
-      return;
+    if(type==='task'){
+      if(!objective){
+        showError('กรุณากรอกวัตถุประสงค์ก่อนส่ง');
+        return;
+      }
+      if(!dueDate){
+        showError('กรุณาเลือกวันที่ต้องการก่อนส่ง');
+        return;
+      }
+      if(!impactDesc){
+        showError('กรุณากรอกผลกระทบก่อนส่ง');
+        return;
+      }
     }
     if(!relayUrl){
       showError('ยังไม่ได้ตั้งค่า Relay URL — กดปุ่ม ⚙︎ ตั้งค่า มุมขวาบนก่อน');
@@ -790,9 +834,18 @@
       if(actual) fullDesc += `\n\n**ผลที่เกิดจริง:** ${actual}`;
     }
     if(type==='task'){
+      fullDesc += `\n\n**วัตถุประสงค์**\n${objective}`;
+      fullDesc += `\n\n**ต้องการภายใน:** ${formatThaiDate(dueDate)}`;
       fullDesc += `\n\n**ผลกระทบ:** ${impactDesc}`;
     }
     if(link) fullDesc += `\n\n**ลิงก์แนบ:** ${link}`;
+
+    // แปลงวันที่เป็น epoch ms (สิ้นวันตามเวลาเครื่อง)
+    let dueTs = null;
+    if(type==='task' && dueDate){
+      const d = new Date(dueDate + 'T23:59:59');
+      if(!isNaN(d.getTime())) dueTs = d.getTime();
+    }
 
     const baseTag = type==='bug' ? 'bug' : 'feature';
 
@@ -804,6 +857,7 @@
       title: title,
       description: fullDesc,
       priority: isCustomer ? 1 : (type==='bug' ? undefined : priority),
+      due_date: dueTs,
       tags: isCustomer ? [baseTag, 'customer'] : [baseTag],
       is_customer: isCustomer,
       attachments: attachments.map(a => ({ name: a.name, mimeType: a.mimeType, data: a.data })),
@@ -813,6 +867,8 @@
         title: title,
         priority_label: isCustomer ? 'Urgent' : (type==='bug' ? null : PRIORITY_LABEL[priority]),
         is_customer: isCustomer,
+        objective: type==='task' ? objective : null,
+        due_label: type==='task' ? formatThaiDate(dueDate) : null,
         impact_desc: type==='task' ? impactDesc : null,
         reporter: reporter,
         attachment_count: attachments.length
@@ -936,6 +992,8 @@
     document.getElementById('reporter').value = '';
     document.getElementById('linkAttach').value = '';
     document.getElementById('impactDesc').value = '';
+    document.getElementById('objective').value = '';
+    document.getElementById('dueDate').value = '';
 
     // รีเซ็ตงานลูกค้า + ความสำคัญ
     document.getElementById('isCustomer').checked = false;
@@ -962,6 +1020,7 @@
     btn.disabled = false;
     btn.textContent = 'บันทึกงาน';
 
+    refreshTaskFields();
     refreshCaseId();
     updateTicket();
   }
