@@ -98,6 +98,11 @@
     margin-bottom:8px;font-weight:600;letter-spacing:0.01em;
   }
   .field label .req{color:var(--red);margin-left:2px;}
+  .field-hint{
+    display:none;font-size:11.5px;color:var(--ink-faint);
+    margin-top:6px;line-height:1.5;
+  }
+  .field-hint.show{display:block;}
   input[type=text], input[type=date], textarea, select{
     width:100%;background:var(--bg-field);border:1px solid var(--line);
     border-radius:9px;padding:11px 13px;color:var(--ink);font-family:var(--font-display);
@@ -106,6 +111,7 @@
   input[type=text]:focus, input[type=date]:focus, textarea:focus, select:focus{border-color:var(--teal);}
   input[type=date]{font-family:var(--font-mono);font-size:14px;}
   textarea{resize:vertical;min-height:78px;line-height:1.5;}
+  textarea#desc{min-height:110px;}
 
   .seg{display:flex;gap:8px;}
   .seg button{
@@ -366,8 +372,9 @@
       </div>
 
       <div class="field">
-        <label>รายละเอียด<span class="req">*</span></label>
-        <textarea id="desc" placeholder="อธิบายสิ่งที่พบ / สิ่งที่ต้องทำ"></textarea>
+        <label><span id="descLabelText">รายละเอียด</span><span class="req">*</span></label>
+        <textarea id="desc" placeholder="อธิบายสิ่งที่พบ"></textarea>
+        <div class="field-hint" id="descHint">ยิ่งละเอียด Dev ยิ่งประเมินเวลาได้แม่นและเริ่มงานได้เร็วขึ้น</div>
       </div>
 
       <div class="bugfields" id="bugFields">
@@ -563,6 +570,12 @@
   const PRODUCT_CODE = { nayoo:'NY', baanprompt:'BP' };
   const PRIORITY_LABEL = { 1:'Urgent', 2:'High', 3:'Normal', 4:'Low' };
 
+  const DESC_LABEL = { bug:'รายละเอียด', task:'Requirement ที่ต้องการ' };
+  const DESC_PLACEHOLDER = {
+    bug: 'อธิบายสิ่งที่พบ',
+    task: 'ระบุสิ่งที่ต้องการให้ชัดเจน เช่น\n• หน้าไหน / ส่วนไหนของระบบ\n• ต้องแสดงข้อมูลอะไรบ้าง\n• เงื่อนไข / กติกาการทำงาน\n• ใครใช้งานได้บ้าง'
+  };
+
   let currentCaseId = null;
 
   function casePrefix(product){
@@ -584,12 +597,17 @@
     }
   }
 
-  // ---- แสดง/ซ่อนช่องเฉพาะประเภทงาน ----
+  // ---- แสดง/ซ่อนช่องเฉพาะประเภทงาน + เปลี่ยนป้ายช่องรายละเอียด ----
   function refreshTaskFields(){
-    const show = type !== 'bug' ? 'block' : 'none';
+    const isTask = type !== 'bug';
+    const show = isTask ? 'block' : 'none';
     document.getElementById('impactField').style.display = show;
     document.getElementById('objectiveField').style.display = show;
     document.getElementById('dueDateField').style.display = show;
+
+    document.getElementById('descLabelText').textContent = isTask ? DESC_LABEL.task : DESC_LABEL.bug;
+    document.getElementById('desc').placeholder = isTask ? DESC_PLACEHOLDER.task : DESC_PLACEHOLDER.bug;
+    document.getElementById('descHint').classList.toggle('show', isTask);
   }
 
   // ---- type toggle ----
@@ -796,7 +814,8 @@
     const dueDate = document.getElementById('dueDate').value;
 
     if(!title || !desc || !reporter){
-      showError('กรุณากรอกหัวข้อ รายละเอียด และผู้แจ้ง ให้ครบก่อนส่ง');
+      const descName = type==='bug' ? DESC_LABEL.bug : DESC_LABEL.task;
+      showError(`กรุณากรอกหัวข้อ ${descName} และผู้แจ้ง ให้ครบก่อนส่ง`);
       return;
     }
     if(type==='task'){
@@ -824,7 +843,8 @@
     btn.textContent = 'กำลังบันทึกงาน...';
     document.getElementById('ticketStamp').textContent = 'กำลังบันทึก...';
 
-    let fullDesc = `**รายละเอียด**\n${desc}\n\n**แจ้งโดย:** ${reporter}\n**วันที่แจ้ง:** ${new Date().toLocaleDateString('th-TH')}`;
+    const descHeading = type==='bug' ? DESC_LABEL.bug : DESC_LABEL.task;
+    let fullDesc = `**${descHeading}**\n${desc}\n\n**แจ้งโดย:** ${reporter}\n**วันที่แจ้ง:** ${new Date().toLocaleDateString('th-TH')}`;
     if(isCustomer){
       fullDesc = `**⭐ งานลูกค้า**\n\n` + fullDesc;
     }
