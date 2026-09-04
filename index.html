@@ -84,7 +84,6 @@
   .grid{display:grid;grid-template-columns:1.15fr 0.85fr;gap:22px;align-items:start;}
   @media (max-width:760px){.grid{grid-template-columns:1fr;}}
 
-  /* ---- form panel ---- */
   .panel{
     background:var(--bg-panel);
     border:1px solid var(--line);
@@ -139,7 +138,6 @@
   .chip[data-p="4"].active{background:var(--ink-faint);border-color:var(--ink-faint);}
   .chip.locked{opacity:0.45;cursor:not-allowed;}
 
-  /* ---- dropdown เลือกหลายจังหวัด ---- */
   .ms{position:relative;}
   .ms-toggle{
     width:100%;background:var(--bg-field);border:1px solid var(--line);border-radius:9px;
@@ -166,7 +164,6 @@
   .ms-opt input{width:16px;height:16px;accent-color:var(--teal);cursor:pointer;margin:0;}
   .ms-opt.all{border-bottom:1px solid var(--line);border-radius:7px 7px 0 0;margin-bottom:4px;padding-bottom:11px;}
 
-  /* ---- customer checkbox ---- */
   .check-row{
     display:flex;align-items:center;gap:9px;cursor:pointer;
     font-size:14px;color:var(--ink);font-weight:600;margin:0;
@@ -230,7 +227,6 @@
     color:#a5222c;font-size:13px;white-space:pre-wrap;
   }
 
-  /* ---- ticket stub ---- */
   .ticket{
     position:sticky;top:24px;background:var(--bg-panel);border:1px solid var(--line);
     border-radius:16px;overflow:hidden;
@@ -286,7 +282,6 @@
     cursor:pointer;text-decoration:underline;
   }
 
-  /* ---- success popup ---- */
   .overlay{
     display:none;position:fixed;inset:0;background:rgba(28,36,48,0.45);
     z-index:100;align-items:center;justify-content:center;padding:20px;
@@ -369,7 +364,6 @@
   </div>
 
   <div class="grid">
-    <!-- FORM -->
     <div class="panel">
       <div class="field">
         <label>ผู้แจ้ง<span class="req">*</span></label>
@@ -482,7 +476,6 @@
       <div class="err" id="errBox"></div>
     </div>
 
-    <!-- TICKET PREVIEW -->
     <div class="ticket" id="ticket">
       <div class="ticket-head">
         <div class="ticket-kind" id="ticketKind">BUG REPORT — NAYOO</div>
@@ -505,7 +498,6 @@
     </div>
   </div>
 
-  <!-- SUCCESS POPUP -->
   <div class="overlay" id="successOverlay">
     <div class="modal">
       <div class="modal-check">✓</div>
@@ -525,7 +517,6 @@
   </div>
 
 </div>
-
 <script>
   /* ============================================================
      ⬇️ ใส่ Web app URL ของ Apps Script ตรงนี้ (ลงท้ายด้วย /exec)
@@ -586,7 +577,6 @@
 
   loadRelayUrl();
 
-  // ---- clock ----
   function tick(){
     const d = new Date();
     document.getElementById('clock').textContent =
@@ -595,7 +585,6 @@
   }
   tick(); setInterval(tick,30000);
 
-  // ---- state ----
   let type = 'bug';
   let priority = 2;
   let isCustomer = false;
@@ -603,8 +592,8 @@
   let submitting = false;
 
   const LIST_IDS = {
-    bug: '901615638489',   // SLA 2026
-    task: '901616215014'   // แจ้งงาน (Task Request)
+    bug: '901615638489',
+    task: '901616215014'
   };
   const PRODUCT_LABEL = { nayoo:'NAYOO', baanprompt:'BAANPROMPT' };
   const PRODUCT_CODE = { nayoo:'NY', baanprompt:'BP' };
@@ -645,7 +634,6 @@
     }
   }
 
-  // ---- ดรอปดาวน์เลือกหลายจังหวัด ----
   function renderProvinceToggle(){
     const btn = document.getElementById('provinceToggle');
     if(!provinces.length){
@@ -655,51 +643,63 @@
       btn.textContent = provinces.join(', ');
       btn.classList.remove('placeholder');
     }else{
-      btn.textContent = `${provinces[0]} และอีก ${provinces.length - 1} จังหวัด`;
+      btn.textContent = provinces[0] + ' และอีก ' + (provinces.length - 1) + ' จังหวัด';
       btn.classList.remove('placeholder');
     }
   }
 
   (function(){
+    const wrap = document.getElementById('provinceMs');
     const menu = document.getElementById('provinceMenu');
     const toggle = document.getElementById('provinceToggle');
 
-    PROVINCES.forEach(name=>{
+    if(!wrap || !menu || !toggle){
+      console.error('province dropdown: หา element ไม่เจอ', {wrap: wrap, menu: menu, toggle: toggle});
+      return;
+    }
+
+    PROVINCES.forEach(function(name){
       const row = document.createElement('label');
       row.className = 'ms-opt' + (name === ALL_PROVINCES ? ' all' : '');
+
       const cb = document.createElement('input');
       cb.type = 'checkbox';
       cb.value = name;
+
       const span = document.createElement('span');
       span.textContent = name;
+
       row.appendChild(cb);
       row.appendChild(span);
       menu.appendChild(row);
 
-      cb.addEventListener('change', ()=>{
+      cb.addEventListener('change', function(){
         const boxes = menu.querySelectorAll('input[type=checkbox]');
         if(name === ALL_PROVINCES){
-          // "ทุกจังหวัด" เป็นตัวเลือกผูกขาด
-          if(cb.checked) boxes.forEach(b=>{ if(b.value !== ALL_PROVINCES) b.checked = false; });
+          if(cb.checked){
+            boxes.forEach(function(b){ if(b.value !== ALL_PROVINCES) b.checked = false; });
+          }
         }else if(cb.checked){
-          const allBox = menu.querySelector(`input[value="${ALL_PROVINCES}"]`);
-          if(allBox) allBox.checked = false;
+          boxes.forEach(function(b){ if(b.value === ALL_PROVINCES) b.checked = false; });
         }
-        provinces = Array.from(boxes).filter(b=>b.checked).map(b=>b.value);
+        provinces = Array.prototype.slice.call(boxes)
+          .filter(function(b){ return b.checked; })
+          .map(function(b){ return b.value; });
         renderProvinceToggle();
         updateTicket();
       });
     });
 
-    toggle.addEventListener('click', (e)=>{
-      e.stopPropagation();
+    toggle.addEventListener('click', function(e){
+      e.preventDefault();
       menu.classList.toggle('show');
     });
-    menu.addEventListener('click', (e)=> e.stopPropagation());
-    document.addEventListener('click', ()=> menu.classList.remove('show'));
+
+    document.addEventListener('click', function(e){
+      if(!wrap.contains(e.target)) menu.classList.remove('show');
+    });
   })();
 
-  // ---- แสดง/ซ่อนช่องเฉพาะประเภทงาน + เปลี่ยนป้ายช่องรายละเอียด ----
   function refreshTaskFields(){
     const isTask = type !== 'bug';
     const show = isTask ? 'block' : 'none';
@@ -712,10 +712,9 @@
     document.getElementById('descHint').classList.toggle('show', isTask);
   }
 
-  // ---- type toggle ----
-  document.querySelectorAll('.seg button[data-v]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('.seg button[data-v]').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.seg button[data-v]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.seg button[data-v]').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
       type = btn.dataset.v;
       document.getElementById('bugFields').classList.toggle('show', type==='bug');
@@ -726,34 +725,31 @@
     });
   });
 
-  // ---- priority chips ----
-  document.querySelectorAll('#priorityField .chip').forEach(chip=>{
-    chip.addEventListener('click', ()=>{
-      if(isCustomer) return;   // ล็อกไว้เมื่อเป็นงานลูกค้า
-      document.querySelectorAll('#priorityField .chip').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('#priorityField .chip').forEach(function(chip){
+    chip.addEventListener('click', function(){
+      if(isCustomer) return;
+      document.querySelectorAll('#priorityField .chip').forEach(function(c){ c.classList.remove('active'); });
       chip.classList.add('active');
       priority = parseInt(chip.dataset.p);
       updateTicket();
     });
   });
 
-  // ---- งานลูกค้า → ล็อกเป็น Urgent ----
-  document.getElementById('isCustomer').addEventListener('change', (e)=>{
+  document.getElementById('isCustomer').addEventListener('change', function(e){
     isCustomer = e.target.checked;
     document.getElementById('customerRow').classList.toggle('on', isCustomer);
     if(isCustomer){ priority = 1; }
-    document.querySelectorAll('#priorityField .chip').forEach(c=>{
+    document.querySelectorAll('#priorityField .chip').forEach(function(c){
       c.classList.toggle('locked', isCustomer);
       if(isCustomer) c.classList.toggle('active', c.dataset.p === '1');
     });
     updateTicket();
   });
 
-  // ---- live ticket preview ----
-  ['title','reporter','dueDate'].forEach(id=>{
+  ['title','reporter','dueDate'].forEach(function(id){
     document.getElementById(id).addEventListener('input', updateTicket);
   });
-  document.getElementById('product').addEventListener('change', ()=>{
+  document.getElementById('product').addEventListener('change', function(){
     refreshCaseId();
     updateTicket();
   });
@@ -787,12 +783,10 @@
     document.getElementById('metaProvinceRow').style.display = provinces.length ? 'flex' : 'none';
     document.getElementById('metaProvince').textContent = provinces.join(', ') || '—';
 
-    // งานลูกค้าให้โชว์ความสำคัญเสมอ แม้เป็น Bug
     const showPriority = isCustomer || type !== 'bug';
     document.getElementById('priorityField').style.display = showPriority ? 'block' : 'none';
     document.getElementById('metaPriorityRow').style.display = showPriority ? 'flex' : 'none';
 
-    // แถวกำหนดส่งโชว์เฉพาะงาน Task
     document.getElementById('metaDueRow').style.display = type!=='bug' ? 'flex' : 'none';
     document.getElementById('metaDue').textContent = formatThaiDate(dueDate);
 
@@ -805,51 +799,52 @@
   refreshCaseId();
   updateTicket();
 
-  // ---- image attachments ----
-  // หมายเหตุ: ไฟล์ถูกส่งไปพร้อม request เดียวในรูป base64 ซึ่งโตขึ้น ~33%
-  // Apps Script รับ POST ได้ราว 50MB จึงจำกัดไว้ที่ 3 ไฟล์ × 8MB
   const MAX_FILES = 3;
   const MAX_SIZE = 8 * 1024 * 1024;
   let attachments = [];
 
   function handleFiles(fileList){
     hideError();
-    const files = Array.from(fileList);
+    const files = Array.prototype.slice.call(fileList);
 
-    for(const file of files){
+    for(var i=0;i<files.length;i++){
+      var file = files[i];
       if(attachments.length >= MAX_FILES){
-        showError(`แนบได้สูงสุด ${MAX_FILES} ไฟล์`);
+        showError('แนบได้สูงสุด ' + MAX_FILES + ' ไฟล์');
         break;
       }
       if(!file.type.startsWith('image/')){
-        showError(`"${file.name}" ไม่ใช่ไฟล์รูป — ข้ามไฟล์นี้`);
+        showError('"' + file.name + '" ไม่ใช่ไฟล์รูป — ข้ามไฟล์นี้');
         continue;
       }
       if(file.size > MAX_SIZE){
-        showError(`"${file.name}" ใหญ่เกิน 8 MB — ข้ามไฟล์นี้`);
+        showError('"' + file.name + '" ใหญ่เกิน 8 MB — ข้ามไฟล์นี้');
         continue;
       }
-
-      const reader = new FileReader();
-      reader.onload = (e)=>{
-        const dataUrl = e.target.result;
-        attachments.push({
-          name: file.name,
-          mimeType: file.type,
-          data: dataUrl.split(',')[1],
-          preview: dataUrl
-        });
-        renderThumbs();
-      };
-      reader.readAsDataURL(file);
+      readOneFile(file);
     }
     document.getElementById('fileInput').value = '';
+  }
+
+  function readOneFile(file){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const dataUrl = e.target.result;
+      attachments.push({
+        name: file.name,
+        mimeType: file.type,
+        data: dataUrl.split(',')[1],
+        preview: dataUrl
+      });
+      renderThumbs();
+    };
+    reader.readAsDataURL(file);
   }
 
   function renderThumbs(){
     const box = document.getElementById('thumbs');
     box.innerHTML = '';
-    attachments.forEach((att, i)=>{
+    attachments.forEach(function(att, i){
       const div = document.createElement('div');
       div.className = 'thumb';
 
@@ -865,23 +860,22 @@
       const btn = document.createElement('button');
       btn.className = 'thumb-remove';
       btn.textContent = '×';
-      btn.onclick = (ev)=>{ ev.stopPropagation(); attachments.splice(i,1); renderThumbs(); };
+      btn.onclick = function(ev){ ev.stopPropagation(); attachments.splice(i,1); renderThumbs(); };
       div.appendChild(btn);
 
       box.appendChild(div);
     });
   }
 
-  // drag and drop
   (function(){
     const dz = document.getElementById('dropzone');
-    ['dragenter','dragover'].forEach(evt=>{
-      dz.addEventListener(evt, (e)=>{ e.preventDefault(); dz.classList.add('dragover'); });
+    ['dragenter','dragover'].forEach(function(evt){
+      dz.addEventListener(evt, function(e){ e.preventDefault(); dz.classList.add('dragover'); });
     });
-    ['dragleave','drop'].forEach(evt=>{
-      dz.addEventListener(evt, (e)=>{ e.preventDefault(); dz.classList.remove('dragover'); });
+    ['dragleave','drop'].forEach(function(evt){
+      dz.addEventListener(evt, function(e){ e.preventDefault(); dz.classList.remove('dragover'); });
     });
-    dz.addEventListener('drop', (e)=>{
+    dz.addEventListener('drop', function(e){
       if(e.dataTransfer && e.dataTransfer.files) handleFiles(e.dataTransfer.files);
     });
   })();
@@ -925,22 +919,13 @@
     }
     if(!title || !desc || !reporter){
       const descName = type==='bug' ? DESC_LABEL.bug : DESC_LABEL.task;
-      showError(`กรุณากรอกหัวข้อ ${descName} และชื่อผู้แจ้ง ให้ครบก่อนส่ง`);
+      showError('กรุณากรอกหัวข้อ ' + descName + ' และชื่อผู้แจ้ง ให้ครบก่อนส่ง');
       return;
     }
     if(type==='task'){
-      if(!objective){
-        showError('กรุณากรอกวัตถุประสงค์ก่อนส่ง');
-        return;
-      }
-      if(!dueDate){
-        showError('กรุณาเลือกวันที่ต้องการก่อนส่ง');
-        return;
-      }
-      if(!impactDesc){
-        showError('กรุณากรอกผลกระทบก่อนส่ง');
-        return;
-      }
+      if(!objective){ showError('กรุณากรอกวัตถุประสงค์ก่อนส่ง'); return; }
+      if(!dueDate){ showError('กรุณาเลือกวันที่ต้องการก่อนส่ง'); return; }
+      if(!impactDesc){ showError('กรุณากรอกผลกระทบก่อนส่ง'); return; }
     }
     if(!relayUrl){
       showError('ยังไม่ได้ตั้งค่า Relay URL — กดปุ่ม ⚙︎ ตั้งค่า มุมขวาบนก่อน');
@@ -958,24 +943,23 @@
 
     let fullDesc = '';
     if(isCustomer){
-      fullDesc += `**⭐ งานลูกค้า**\n\n`;
+      fullDesc += '**⭐ งานลูกค้า**\n\n';
     }
-    fullDesc += `**จังหวัดผู้แจ้ง:** ${provinceLabel}\n\n`;
-    fullDesc += `**${descHeading}**\n${desc}\n\n**แจ้งโดย:** ${reporter}\n**วันที่แจ้ง:** ${new Date().toLocaleDateString('th-TH')}`;
+    fullDesc += '**จังหวัดผู้แจ้ง:** ' + provinceLabel + '\n\n';
+    fullDesc += '**' + descHeading + '**\n' + desc + '\n\n**แจ้งโดย:** ' + reporter + '\n**วันที่แจ้ง:** ' + new Date().toLocaleDateString('th-TH');
 
     if(type==='bug'){
-      if(steps) fullDesc += `\n\n**ขั้นตอนที่ทำให้เกิด**\n${steps}`;
-      if(expected) fullDesc += `\n\n**ผลที่ควรเป็น:** ${expected}`;
-      if(actual) fullDesc += `\n\n**ผลที่เกิดจริง:** ${actual}`;
+      if(steps) fullDesc += '\n\n**ขั้นตอนที่ทำให้เกิด**\n' + steps;
+      if(expected) fullDesc += '\n\n**ผลที่ควรเป็น:** ' + expected;
+      if(actual) fullDesc += '\n\n**ผลที่เกิดจริง:** ' + actual;
     }
     if(type==='task'){
-      fullDesc += `\n\n**วัตถุประสงค์**\n${objective}`;
-      fullDesc += `\n\n**ต้องการภายใน:** ${formatThaiDate(dueDate)}`;
-      fullDesc += `\n\n**ผลกระทบ:** ${impactDesc}`;
+      fullDesc += '\n\n**วัตถุประสงค์**\n' + objective;
+      fullDesc += '\n\n**ต้องการภายใน:** ' + formatThaiDate(dueDate);
+      fullDesc += '\n\n**ผลกระทบ:** ' + impactDesc;
     }
-    if(link) fullDesc += `\n\n**ลิงก์แนบ:** ${link}`;
+    if(link) fullDesc += '\n\n**ลิงก์แนบ:** ' + link;
 
-    // แปลงวันที่เป็น epoch ms (สิ้นวันตามเวลาเครื่อง)
     let dueTs = null;
     if(type==='task' && dueDate){
       const d = new Date(dueDate + 'T23:59:59');
@@ -997,7 +981,7 @@
       tags: tags,
       is_customer: isCustomer,
       provinces: provinces,
-      attachments: attachments.map(a => ({ name: a.name, mimeType: a.mimeType, data: a.data })),
+      attachments: attachments.map(function(a){ return { name: a.name, mimeType: a.mimeType, data: a.data }; }),
       notify: {
         type: type,
         product: product,
@@ -1007,4 +991,154 @@
         provinces_label: provinceLabel,
         objective: type==='task' ? objective : null,
         due_label: type==='task' ? formatThaiDate(dueDate) : null,
-        impact_desc:
+        impact_desc: type==='task' ? impactDesc : null,
+        reporter: reporter,
+        attachment_count: attachments.length
+      }
+    };
+
+    let result;
+    try{
+      const resp = await fetch(relayUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(requestPayload)
+      });
+
+      const raw = await resp.text();
+      try{
+        result = JSON.parse(raw);
+      }catch(parseErr){
+        console.error('Relay response not JSON:', raw);
+        showError('Relay ตอบกลับมาในรูปแบบที่อ่านไม่ได้ — ตรวจสอบว่า Deploy เวอร์ชันล่าสุดแล้วหรือยัง');
+        endSubmitting();
+        return;
+      }
+    }catch(networkErr){
+      console.error(networkErr);
+      showError('ส่งคำขอไปที่ Relay ไม่สำเร็จ — ตรวจสอบ Relay URL และการเชื่อมต่ออินเทอร์เน็ต');
+      endSubmitting();
+      return;
+    }
+
+    if(!result.ok){
+      showError('บันทึกไม่สำเร็จ: ' + (result.error || 'ไม่ทราบสาเหตุ'));
+      endSubmitting();
+      return;
+    }
+
+    currentCaseId = result.case_id || null;
+    const taskUrl = result.task_url || null;
+
+    const stamp = document.getElementById('ticketStamp');
+    stamp.textContent = 'บันทึกแล้ว ✓';
+    stamp.classList.add('saved');
+
+    if(type==='bug' && currentCaseId){
+      document.getElementById('caseIdValue').textContent = currentCaseId;
+      document.getElementById('ticketId').textContent = currentCaseId;
+    }else if(type!=='bug' && result.task_id){
+      document.getElementById('ticketId').textContent = PRODUCT_CODE[product] + '-' + String(result.task_id).toUpperCase();
+    }
+
+    const linkEl = document.getElementById('ticketLink');
+    if(taskUrl){
+      linkEl.href = taskUrl;
+      linkEl.textContent = 'เปิดดูงาน →';
+      linkEl.style.display = 'block';
+    }else{
+      linkEl.style.display = 'none';
+    }
+
+    document.getElementById('resetLink').style.display = 'block';
+    btn.style.display = 'none';
+    submitting = false;
+
+    showSuccess({
+      isBug: type === 'bug',
+      caseId: currentCaseId,
+      taskUrl: taskUrl,
+      failedFiles: result.attachments_failed || []
+    });
+  }
+
+  function showSuccess(info){
+    document.getElementById('modalTitle').textContent =
+      info.isBug ? 'แจ้งบัคเรียบร้อยแล้ว' : 'แจ้งงานเรียบร้อยแล้ว';
+
+    let sub = 'บันทึกเข้าระบบและแจ้งเตือนเข้ากลุ่ม LINE แล้ว';
+    if(info.failedFiles && info.failedFiles.length){
+      sub += '\n⚠️ แนบไฟล์ไม่สำเร็จ: ' + info.failedFiles.join(', ');
+    }
+    document.getElementById('modalSub').textContent = sub;
+
+    const caseBox = document.getElementById('modalCaseBox');
+    if(info.isBug && info.caseId){
+      caseBox.style.display = 'block';
+      document.getElementById('modalCaseValue').textContent = info.caseId;
+    }else{
+      caseBox.style.display = 'none';
+    }
+
+    const openLink = document.getElementById('modalOpenLink');
+    if(info.taskUrl){
+      openLink.href = info.taskUrl;
+      openLink.style.display = 'block';
+    }else{
+      openLink.style.display = 'none';
+    }
+
+    document.getElementById('successOverlay').classList.add('show');
+  }
+
+  function closeSuccess(){
+    document.getElementById('successOverlay').classList.remove('show');
+    resetForm();
+  }
+
+  document.getElementById('successOverlay').addEventListener('click', function(e){
+    if(e.target.id === 'successOverlay') closeSuccess();
+  });
+
+  function resetForm(){
+    document.getElementById('title').value = '';
+    document.getElementById('desc').value = '';
+    document.getElementById('steps').value = '';
+    document.getElementById('expected').value = '';
+    document.getElementById('actual').value = '';
+    document.getElementById('linkAttach').value = '';
+    document.getElementById('impactDesc').value = '';
+    document.getElementById('objective').value = '';
+    document.getElementById('dueDate').value = '';
+
+    document.getElementById('isCustomer').checked = false;
+    isCustomer = false;
+    priority = 2;
+    document.getElementById('customerRow').classList.remove('on');
+    document.querySelectorAll('#priorityField .chip').forEach(function(c){
+      c.classList.remove('locked');
+      c.classList.toggle('active', c.dataset.p === '2');
+    });
+
+    attachments = [];
+    renderThumbs();
+    document.getElementById('errBox').style.display = 'none';
+
+    const stamp = document.getElementById('ticketStamp');
+    stamp.textContent = 'รอบันทึก';
+    stamp.classList.remove('saved');
+    document.getElementById('ticketLink').style.display = 'none';
+    document.getElementById('resetLink').style.display = 'none';
+
+    const btn = document.getElementById('submitBtn');
+    btn.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'บันทึกงาน';
+
+    refreshTaskFields();
+    refreshCaseId();
+    updateTicket();
+  }
+</script>
+</body>
+</html>
