@@ -19,8 +19,6 @@
     --amber-dim:#fbebd5;
     --teal:#0e9488;
     --teal-dim:#dff3ef;
-    --blue:#3b6fd4;
-    --blue-dim:#e3ecfb;
     --red:#d64550;
     --font-display:'Sarabun',sans-serif;
     --font-mono:'IBM Plex Mono',monospace;
@@ -124,8 +122,6 @@
   }
   .seg button.active[data-v="bug"]{background:var(--amber-dim);border-color:var(--amber);color:var(--amber);}
   .seg button.active[data-v="task"]{background:var(--teal-dim);border-color:var(--teal);color:var(--teal);}
-  .seg button.active[data-w="internal"]{background:var(--teal-dim);border-color:var(--teal);color:var(--teal);}
-  .seg button.active[data-w="partner"]{background:var(--blue-dim);border-color:var(--blue);color:var(--blue);}
 
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
   @media (max-width:480px){.row2{grid-template-columns:1fr;}}
@@ -266,10 +262,9 @@
   .ticket-flag{
     display:none;margin-top:10px;padding:6px 10px;border-radius:7px;
     font-size:12px;font-weight:700;letter-spacing:0.02em;text-align:center;
+    background:rgba(214,69,80,0.09);color:var(--red);
   }
   .ticket-flag.show{display:block;}
-  .ticket-flag.customer{background:rgba(214,69,80,0.09);color:var(--red);}
-  .ticket-flag.partner{background:var(--blue-dim);color:var(--blue);}
   .ticket-meta{margin-top:14px;display:flex;flex-direction:column;gap:9px;}
   .ticket-meta-row{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;}
   .ticket-meta-row .k{color:var(--ink-faint);white-space:nowrap;}
@@ -378,20 +373,11 @@
     <div class="panel">
       <div class="field">
         <label>ผู้แจ้ง<span class="req">*</span></label>
-        <div class="seg" id="whoSeg">
-          <button type="button" data-w="internal" class="active">🏢 ทีมภายใน</button>
-          <button type="button" data-w="partner">🤝 พาร์ทเนอร์</button>
+        <div class="ms" id="provinceMs">
+          <button type="button" class="ms-toggle placeholder" id="provinceToggle">— เลือกจังหวัด —</button>
+          <div class="ms-menu" id="provinceMenu"></div>
         </div>
-      </div>
-
-      <div class="field" id="companyField">
-        <label>บริษัท / พาร์ทเนอร์<span class="req">*</span></label>
-        <input type="text" id="company" placeholder="ชื่อบริษัทของท่าน">
-      </div>
-
-      <div class="field" id="contactField">
-        <label>ช่องทางติดต่อกลับ<span class="req">*</span></label>
-        <input type="text" id="contact" placeholder="อีเมล / เบอร์โทร / LINE ID">
+        <div class="field-note">เลือกได้หลายจังหวัด — ถ้าเกี่ยวข้องทุกจังหวัดหรือไม่เกี่ยวกับจังหวัด ให้เลือก "ทุกจังหวัด"</div>
       </div>
 
       <div class="field">
@@ -403,7 +389,7 @@
         <div class="caseid-line" id="caseIdLine">เลข Case: <span id="caseIdValue">—</span></div>
       </div>
 
-      <div class="field" id="customerField">
+      <div class="field">
         <label class="check-row" id="customerRow">
           <input type="checkbox" id="isCustomer">
           <span>งานลูกค้า</span>
@@ -427,15 +413,6 @@
         <label><span id="descLabelText">รายละเอียด</span><span class="req">*</span></label>
         <textarea id="desc" placeholder="อธิบายสิ่งที่พบ"></textarea>
         <div class="field-hint" id="descHint">ยิ่งละเอียด Dev ยิ่งประเมินเวลาได้แม่นและเริ่มงานได้เร็วขึ้น</div>
-      </div>
-
-      <div class="field" id="provinceField">
-        <label>จังหวัดที่พบ<span class="req">*</span></label>
-        <div class="ms" id="provinceMs">
-          <button type="button" class="ms-toggle placeholder" id="provinceToggle">— เลือกจังหวัด —</button>
-          <div class="ms-menu" id="provinceMenu"></div>
-        </div>
-        <div class="field-note">เลือกได้หลายจังหวัด — ถ้าพบทุกจังหวัดหรือไม่เกี่ยวกับจังหวัด ให้เลือก "ทุกจังหวัด"</div>
       </div>
 
       <div class="bugfields" id="bugFields">
@@ -513,12 +490,10 @@
       </div>
       <div class="ticket-body">
         <div class="ticket-title placeholder" id="ticketTitle">รอกรอกหัวข้อ...</div>
-        <div class="ticket-flag partner" id="ticketPartner">🤝 แจ้งโดยพาร์ทเนอร์</div>
-        <div class="ticket-flag customer" id="ticketCustomer">⭐ งานลูกค้า</div>
+        <div class="ticket-flag" id="ticketCustomer">⭐ งานลูกค้า</div>
         <div class="ticket-meta">
-          <div class="ticket-meta-row" id="metaCompanyRow"><span class="k">บริษัท</span><span class="v wrap" id="metaCompany">—</span></div>
-          <div class="ticket-meta-row" id="metaPriorityRow"><span class="k">ความสำคัญ</span><span class="v" id="metaPriority">High</span></div>
           <div class="ticket-meta-row" id="metaProvinceRow"><span class="k">จังหวัด</span><span class="v wrap" id="metaProvince">—</span></div>
+          <div class="ticket-meta-row" id="metaPriorityRow"><span class="k">ความสำคัญ</span><span class="v" id="metaPriority">High</span></div>
           <div class="ticket-meta-row" id="metaDueRow"><span class="k">ต้องการภายใน</span><span class="v" id="metaDue">—</span></div>
           <div class="ticket-meta-row"><span class="k">ผู้แจ้ง</span><span class="v wrap" id="metaReporter">—</span></div>
           <div class="ticket-meta-row"><span class="k">วันที่</span><span class="v" id="metaDate">—</span></div>
@@ -621,7 +596,6 @@
   tick(); setInterval(tick,30000);
 
   // ---- state ----
-  let who = 'internal';
   let type = 'bug';
   let priority = 2;
   let isCustomer = false;
@@ -725,35 +699,6 @@
     document.addEventListener('click', ()=> menu.classList.remove('show'));
   })();
 
-  // ---- ทีมใน / พาร์ทเนอร์ ----
-  function refreshWhoFields(){
-    const isPartner = who === 'partner';
-    document.getElementById('companyField').style.display = isPartner ? 'block' : 'none';
-    document.getElementById('contactField').style.display = isPartner ? 'block' : 'none';
-    // ช่องภายในองค์กร ไม่ให้พาร์ทเนอร์เห็น
-    document.getElementById('customerField').style.display = isPartner ? 'none' : 'block';
-    if(isPartner && isCustomer){
-      document.getElementById('isCustomer').checked = false;
-      isCustomer = false;
-      document.getElementById('customerRow').classList.remove('on');
-      document.querySelectorAll('#priorityField .chip').forEach(c=>{
-        c.classList.remove('locked');
-        c.classList.toggle('active', c.dataset.p === '2');
-      });
-      priority = 2;
-    }
-  }
-
-  document.querySelectorAll('#whoSeg button').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('#whoSeg button').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      who = btn.dataset.w;
-      refreshWhoFields();
-      updateTicket();
-    });
-  });
-
   // ---- แสดง/ซ่อนช่องเฉพาะประเภทงาน + เปลี่ยนป้ายช่องรายละเอียด ----
   function refreshTaskFields(){
     const isTask = type !== 'bug';
@@ -805,7 +750,7 @@
   });
 
   // ---- live ticket preview ----
-  ['title','reporter','dueDate','company'].forEach(id=>{
+  ['title','reporter','dueDate'].forEach(id=>{
     document.getElementById(id).addEventListener('input', updateTicket);
   });
   document.getElementById('product').addEventListener('change', ()=>{
@@ -824,9 +769,7 @@
     const product = document.getElementById('product').value;
     const title = document.getElementById('title').value.trim();
     const reporter = document.getElementById('reporter').value.trim();
-    const company = document.getElementById('company').value.trim();
     const dueDate = document.getElementById('dueDate').value;
-    const isPartner = who === 'partner';
 
     document.getElementById('ticketKind').textContent =
       (type==='bug' ? 'BUG REPORT' : 'TASK REQUEST') + ' — ' + PRODUCT_LABEL[product];
@@ -839,20 +782,15 @@
     titleEl.textContent = title || 'รอกรอกหัวข้อ...';
     titleEl.classList.toggle('placeholder', !title);
 
-    document.getElementById('ticketPartner').classList.toggle('show', isPartner);
     document.getElementById('ticketCustomer').classList.toggle('show', isCustomer);
 
-    document.getElementById('metaCompanyRow').style.display = isPartner ? 'flex' : 'none';
-    document.getElementById('metaCompany').textContent = company || '—';
+    document.getElementById('metaProvinceRow').style.display = provinces.length ? 'flex' : 'none';
+    document.getElementById('metaProvince').textContent = provinces.join(', ') || '—';
 
     // งานลูกค้าให้โชว์ความสำคัญเสมอ แม้เป็น Bug
     const showPriority = isCustomer || type !== 'bug';
     document.getElementById('priorityField').style.display = showPriority ? 'block' : 'none';
     document.getElementById('metaPriorityRow').style.display = showPriority ? 'flex' : 'none';
-
-    // แถวจังหวัดโชว์เมื่อเลือกแล้วเท่านั้น
-    document.getElementById('metaProvinceRow').style.display = provinces.length ? 'flex' : 'none';
-    document.getElementById('metaProvince').textContent = provinces.join(', ') || '—';
 
     // แถวกำหนดส่งโชว์เฉพาะงาน Task
     document.getElementById('metaDueRow').style.display = type!=='bug' ? 'flex' : 'none';
@@ -863,7 +801,6 @@
     document.getElementById('metaDate').textContent = new Date().toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});
   }
   renderProvinceToggle();
-  refreshWhoFields();
   refreshTaskFields();
   refreshCaseId();
   updateTicket();
@@ -970,13 +907,10 @@
     if(submitting) return;
     hideError();
 
-    const isPartner = who === 'partner';
     const product = document.getElementById('product').value;
     const title = document.getElementById('title').value.trim();
     const desc = document.getElementById('desc').value.trim();
     const reporter = document.getElementById('reporter').value.trim();
-    const company = document.getElementById('company').value.trim();
-    const contact = document.getElementById('contact').value.trim();
     const link = document.getElementById('linkAttach').value.trim();
     const steps = document.getElementById('steps').value.trim();
     const expected = document.getElementById('expected').value.trim();
@@ -985,17 +919,13 @@
     const objective = document.getElementById('objective').value.trim();
     const dueDate = document.getElementById('dueDate').value;
 
-    if(isPartner && (!company || !contact)){
-      showError('กรุณากรอกบริษัท และช่องทางติดต่อกลับ ให้ครบก่อนส่ง');
+    if(!provinces.length){
+      showError('กรุณาเลือกจังหวัดผู้แจ้งก่อนส่ง — ถ้าไม่เกี่ยวกับจังหวัด เลือก "ทุกจังหวัด"');
       return;
     }
     if(!title || !desc || !reporter){
       const descName = type==='bug' ? DESC_LABEL.bug : DESC_LABEL.task;
       showError(`กรุณากรอกหัวข้อ ${descName} และชื่อผู้แจ้ง ให้ครบก่อนส่ง`);
-      return;
-    }
-    if(!provinces.length){
-      showError('กรุณาเลือกจังหวัดที่พบก่อนส่ง — ถ้าไม่เกี่ยวกับจังหวัด เลือก "ทุกจังหวัด"');
       return;
     }
     if(type==='task'){
@@ -1027,14 +957,11 @@
     const descHeading = type==='bug' ? DESC_LABEL.bug : DESC_LABEL.task;
 
     let fullDesc = '';
-    if(isPartner){
-      fullDesc += `**🤝 แจ้งโดยพาร์ทเนอร์**\n\n**บริษัท:** ${company}\n**ติดต่อกลับ:** ${contact}\n\n`;
-    }
     if(isCustomer){
       fullDesc += `**⭐ งานลูกค้า**\n\n`;
     }
+    fullDesc += `**จังหวัดผู้แจ้ง:** ${provinceLabel}\n\n`;
     fullDesc += `**${descHeading}**\n${desc}\n\n**แจ้งโดย:** ${reporter}\n**วันที่แจ้ง:** ${new Date().toLocaleDateString('th-TH')}`;
-    fullDesc += `\n\n**จังหวัดที่พบ:** ${provinceLabel}`;
 
     if(type==='bug'){
       if(steps) fullDesc += `\n\n**ขั้นตอนที่ทำให้เกิด**\n${steps}`;
@@ -1057,7 +984,6 @@
 
     const tags = [type==='bug' ? 'bug' : 'feature'];
     if(isCustomer) tags.push('customer');
-    if(isPartner) tags.push('partner');
 
     const requestPayload = {
       action: 'create_task',
@@ -1070,7 +996,6 @@
       due_date: dueTs,
       tags: tags,
       is_customer: isCustomer,
-      is_partner: isPartner,
       provinces: provinces,
       attachments: attachments.map(a => ({ name: a.name, mimeType: a.mimeType, data: a.data })),
       notify: {
@@ -1082,171 +1007,4 @@
         provinces_label: provinceLabel,
         objective: type==='task' ? objective : null,
         due_label: type==='task' ? formatThaiDate(dueDate) : null,
-        impact_desc: type==='task' ? impactDesc : null,
-        reporter: isPartner ? `${reporter} (${company}) · พาร์ทเนอร์` : reporter,
-        attachment_count: attachments.length
-      }
-    };
-
-    let result;
-    try{
-      // ใช้ Content-Type: text/plain เพื่อเลี่ยง CORS preflight
-      // (Apps Script ไม่ตอบ OPTIONS request)
-      const resp = await fetch(relayUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(requestPayload)
-      });
-
-      const raw = await resp.text();
-      try{
-        result = JSON.parse(raw);
-      }catch(parseErr){
-        console.error('Relay response not JSON:', raw);
-        showError('Relay ตอบกลับมาในรูปแบบที่อ่านไม่ได้ — ตรวจสอบว่า Deploy เวอร์ชันล่าสุดแล้วหรือยัง');
-        endSubmitting();
-        return;
-      }
-    }catch(networkErr){
-      console.error(networkErr);
-      showError('ส่งคำขอไปที่ Relay ไม่สำเร็จ — ตรวจสอบ Relay URL และการเชื่อมต่ออินเทอร์เน็ต');
-      endSubmitting();
-      return;
-    }
-
-    if(!result.ok){
-      showError('บันทึกไม่สำเร็จ: ' + (result.error || 'ไม่ทราบสาเหตุ'));
-      endSubmitting();
-      return;
-    }
-
-    // ---- สำเร็จ ----
-    currentCaseId = result.case_id || null;
-    const taskUrl = result.task_url || null;
-
-    const stamp = document.getElementById('ticketStamp');
-    stamp.textContent = 'บันทึกแล้ว ✓';
-    stamp.classList.add('saved');
-
-    if(type==='bug' && currentCaseId){
-      document.getElementById('caseIdValue').textContent = currentCaseId;
-      document.getElementById('ticketId').textContent = currentCaseId;
-    }else if(type!=='bug' && result.task_id){
-      document.getElementById('ticketId').textContent = PRODUCT_CODE[product] + '-' + String(result.task_id).toUpperCase();
-    }
-
-    // พาร์ทเนอร์เปิดลิงก์ ClickUp ไม่ได้ จึงไม่แสดง
-    const linkEl = document.getElementById('ticketLink');
-    if(taskUrl && !isPartner){
-      linkEl.href = taskUrl;
-      linkEl.textContent = 'เปิดดูงาน →';
-      linkEl.style.display = 'block';
-    }else{
-      linkEl.style.display = 'none';
-    }
-
-    document.getElementById('resetLink').style.display = 'block';
-    btn.style.display = 'none';
-    submitting = false;
-
-    showSuccess({
-      isBug: type === 'bug',
-      isPartner: isPartner,
-      caseId: currentCaseId,
-      taskUrl: taskUrl,
-      failedFiles: result.attachments_failed || []
-    });
-  }
-
-  // ---- success popup ----
-  function showSuccess(info){
-    document.getElementById('modalTitle').textContent =
-      info.isBug ? 'แจ้งบัคเรียบร้อยแล้ว' : 'แจ้งงานเรียบร้อยแล้ว';
-
-    let sub = info.isPartner
-      ? 'ทีมงานได้รับเรื่องแล้ว และจะติดต่อกลับตามช่องทางที่ให้ไว้'
-      : 'บันทึกเข้าระบบและแจ้งเตือนเข้ากลุ่ม LINE แล้ว';
-    if(info.failedFiles && info.failedFiles.length){
-      sub += `\n⚠️ แนบไฟล์ไม่สำเร็จ: ${info.failedFiles.join(', ')}`;
-    }
-    document.getElementById('modalSub').textContent = sub;
-
-    const caseBox = document.getElementById('modalCaseBox');
-    if(info.isBug && info.caseId){
-      caseBox.style.display = 'block';
-      document.getElementById('modalCaseValue').textContent = info.caseId;
-    }else{
-      caseBox.style.display = 'none';
-    }
-
-    const openLink = document.getElementById('modalOpenLink');
-    if(info.taskUrl && !info.isPartner){
-      openLink.href = info.taskUrl;
-      openLink.style.display = 'block';
-    }else{
-      openLink.style.display = 'none';
-    }
-
-    document.getElementById('successOverlay').classList.add('show');
-  }
-
-  function closeSuccess(){
-    document.getElementById('successOverlay').classList.remove('show');
-    resetForm();
-  }
-
-  // คลิกพื้นหลังมืดเพื่อปิด popup ได้ด้วย
-  document.getElementById('successOverlay').addEventListener('click', (e)=>{
-    if(e.target.id === 'successOverlay') closeSuccess();
-  });
-
-  function resetForm(){
-    // เก็บบริษัท/ติดต่อ/ชื่อผู้แจ้ง ไว้ เผื่อแจ้งหลายเรื่องติดกัน
-    document.getElementById('title').value = '';
-    document.getElementById('desc').value = '';
-    document.getElementById('steps').value = '';
-    document.getElementById('expected').value = '';
-    document.getElementById('actual').value = '';
-    document.getElementById('linkAttach').value = '';
-    document.getElementById('impactDesc').value = '';
-    document.getElementById('objective').value = '';
-    document.getElementById('dueDate').value = '';
-
-    // รีเซ็ตจังหวัด
-    provinces = [];
-    document.querySelectorAll('#provinceMenu input[type=checkbox]').forEach(b=>b.checked = false);
-    renderProvinceToggle();
-
-    // รีเซ็ตงานลูกค้า + ความสำคัญ
-    document.getElementById('isCustomer').checked = false;
-    isCustomer = false;
-    priority = 2;
-    document.getElementById('customerRow').classList.remove('on');
-    document.querySelectorAll('#priorityField .chip').forEach(c=>{
-      c.classList.remove('locked');
-      c.classList.toggle('active', c.dataset.p === '2');
-    });
-
-    attachments = [];
-    renderThumbs();
-    document.getElementById('errBox').style.display = 'none';
-
-    const stamp = document.getElementById('ticketStamp');
-    stamp.textContent = 'รอบันทึก';
-    stamp.classList.remove('saved');
-    document.getElementById('ticketLink').style.display = 'none';
-    document.getElementById('resetLink').style.display = 'none';
-
-    const btn = document.getElementById('submitBtn');
-    btn.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'บันทึกงาน';
-
-    refreshWhoFields();
-    refreshTaskFields();
-    refreshCaseId();
-    updateTicket();
-  }
-</script>
-</body>
-</html>
+        impact_desc:
