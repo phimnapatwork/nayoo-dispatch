@@ -409,7 +409,28 @@
         <div class="field-hint" id="descHint">ยิ่งละเอียด Dev ยิ่งประเมินเวลาได้แม่นและเริ่มงานได้เร็วขึ้น</div>
       </div>
 
-      <div class="bugfields" id="bugFields">
+      <div class="bugfields show" id="bugFields">
+        <div class="row2">
+          <div class="field">
+            <label>หมวดหมู่<span class="req">*</span></label>
+            <select id="bugCategory">
+              <option value="">— เลือกหมวดหมู่ —</option>
+              <option value="โครงการใหม่">โครงการใหม่</option>
+              <option value="มือสอง">มือสอง</option>
+              <option value="เช่า/หอพัก">เช่า/หอพัก</option>
+              <option value="รับสร้างบ้าน">รับสร้างบ้าน</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>ระบบที่พบ</label>
+            <input type="text" id="bugSystem" list="bugSystemList" placeholder="เลือกหรือพิมพ์เพิ่ม">
+            <datalist id="bugSystemList">
+              <option value="Back Office">
+              <option value="Console">
+              <option value="NaYoo">
+            </datalist>
+          </div>
+        </div>
         <div class="field">
           <label>ขั้นตอนที่ทำให้เกิด (Steps to reproduce)</label>
           <textarea id="steps" placeholder="1) เข้าหน้า...&#10;2) กด...&#10;3) เจอ..."></textarea>
@@ -486,6 +507,8 @@
         <div class="ticket-flag" id="ticketCustomer">⭐ งานลูกค้า</div>
         <div class="ticket-meta">
           <div class="ticket-meta-row" id="metaProvinceRow"><span class="k">จังหวัด</span><span class="v wrap" id="metaProvince">—</span></div>
+          <div class="ticket-meta-row" id="metaCategoryRow"><span class="k">หมวดหมู่</span><span class="v" id="metaCategory">—</span></div>
+          <div class="ticket-meta-row" id="metaSystemRow"><span class="k">ระบบที่พบ</span><span class="v" id="metaSystem">—</span></div>
           <div class="ticket-meta-row" id="metaPriorityRow"><span class="k">ความสำคัญ</span><span class="v" id="metaPriority">High</span></div>
           <div class="ticket-meta-row" id="metaDueRow"><span class="k">ต้องการภายใน</span><span class="v" id="metaDue">—</span></div>
           <div class="ticket-meta-row"><span class="k">ผู้แจ้ง</span><span class="v wrap" id="metaReporter">—</span></div>
@@ -749,6 +772,8 @@
   ['title','reporter','dueDate'].forEach(function(id){
     document.getElementById(id).addEventListener('input', updateTicket);
   });
+  document.getElementById('bugCategory').addEventListener('change', updateTicket);
+  document.getElementById('bugSystem').addEventListener('input', updateTicket);
   document.getElementById('product').addEventListener('change', function(){
     refreshCaseId();
     updateTicket();
@@ -779,6 +804,13 @@
     titleEl.classList.toggle('placeholder', !title);
 
     document.getElementById('ticketCustomer').classList.toggle('show', isCustomer);
+
+    const bugCategory = document.getElementById('bugCategory').value;
+    const bugSystem = document.getElementById('bugSystem').value.trim();
+    document.getElementById('metaCategoryRow').style.display = (type==='bug' && bugCategory) ? 'flex' : 'none';
+    document.getElementById('metaCategory').textContent = bugCategory || '—';
+    document.getElementById('metaSystemRow').style.display = (type==='bug' && bugSystem) ? 'flex' : 'none';
+    document.getElementById('metaSystem').textContent = bugSystem || '—';
 
     document.getElementById('metaProvinceRow').style.display = provinces.length ? 'flex' : 'none';
     document.getElementById('metaProvince').textContent = provinces.join(', ') || '—';
@@ -912,7 +944,12 @@
     const impactDesc = document.getElementById('impactDesc').value.trim();
     const objective = document.getElementById('objective').value.trim();
     const dueDate = document.getElementById('dueDate').value;
+    const bugCategory = document.getElementById('bugCategory').value;
+    const bugSystem = document.getElementById('bugSystem').value.trim();
 
+    if(type==='bug'){
+      if(!bugCategory){ showError('กรุณาเลือกหมวดหมู่ก่อนส่ง'); return; }
+    }
     if(!provinces.length){
       showError('กรุณาเลือกจังหวัดผู้แจ้งก่อนส่ง — ถ้าไม่เกี่ยวกับจังหวัด เลือก "ทุกจังหวัด"');
       return;
@@ -945,6 +982,10 @@
     if(isCustomer){
       fullDesc += '**⭐ งานลูกค้า**\n\n';
     }
+    if(type==='bug'){
+      fullDesc += '**หมวดหมู่:** ' + bugCategory + '\n';
+      if(bugSystem) fullDesc += '**ระบบที่พบ:** ' + bugSystem + '\n';
+    }
     fullDesc += '**จังหวัดผู้แจ้ง:** ' + provinceLabel + '\n\n';
     fullDesc += '**' + descHeading + '**\n' + desc + '\n\n**แจ้งโดย:** ' + reporter + '\n**วันที่แจ้ง:** ' + new Date().toLocaleDateString('th-TH');
 
@@ -968,6 +1009,7 @@
 
     const tags = [type==='bug' ? 'bug' : 'feature'];
     if(isCustomer) tags.push('customer');
+    if(type==='bug'){ tags.push(bugCategory); if(bugSystem) tags.push(bugSystem.toLowerCase()); }
 
     const requestPayload = {
       action: 'create_task',
@@ -989,6 +1031,8 @@
         priority_label: isCustomer ? 'Urgent' : (type==='bug' ? null : PRIORITY_LABEL[priority]),
         is_customer: isCustomer,
         provinces_label: provinceLabel,
+        category: type==='bug' ? bugCategory : null,
+        system: (type==='bug' && bugSystem) ? bugSystem : null,
         objective: type==='task' ? objective : null,
         due_label: type==='task' ? formatThaiDate(dueDate) : null,
         impact_desc: type==='task' ? impactDesc : null,
@@ -1110,6 +1154,8 @@
     document.getElementById('impactDesc').value = '';
     document.getElementById('objective').value = '';
     document.getElementById('dueDate').value = '';
+    document.getElementById('bugCategory').value = '';
+    document.getElementById('bugSystem').value = '';
 
     document.getElementById('isCustomer').checked = false;
     isCustomer = false;
