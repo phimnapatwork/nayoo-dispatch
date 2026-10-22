@@ -371,7 +371,7 @@
           <button type="button" class="ms-toggle placeholder" id="provinceToggle">— เลือกจังหวัด —</button>
           <div class="ms-menu" id="provinceMenu"></div>
         </div>
-        <div class="field-note">เลือกได้หลายจังหวัด — ถ้าเกี่ยวข้องทุกจังหวัดหรือไม่เกี่ยวกับจังหวัด ให้เลือก "ทุกจังหวัด"</div>
+        <div class="field-note">เลือกได้จังหวัดเดียว</div>
       </div>
 
       <div class="field">
@@ -430,6 +430,10 @@
               <option value="NaYoo">
             </datalist>
           </div>
+        </div>
+        <div class="field">
+          <label>URL ที่เจอ Bug</label>
+          <input type="url" id="bugUrl" placeholder="https://...">
         </div>
         <div class="field">
           <label>ขั้นตอนที่ทำให้เกิด (Steps to reproduce)</label>
@@ -509,6 +513,7 @@
           <div class="ticket-meta-row" id="metaProvinceRow"><span class="k">จังหวัด</span><span class="v wrap" id="metaProvince">—</span></div>
           <div class="ticket-meta-row" id="metaCategoryRow"><span class="k">หมวดหมู่</span><span class="v" id="metaCategory">—</span></div>
           <div class="ticket-meta-row" id="metaSystemRow"><span class="k">ระบบที่พบ</span><span class="v" id="metaSystem">—</span></div>
+          <div class="ticket-meta-row" id="metaUrlRow"><span class="k">URL</span><span class="v wrap" id="metaUrl">—</span></div>
           <div class="ticket-meta-row" id="metaPriorityRow"><span class="k">ความสำคัญ</span><span class="v" id="metaPriority">High</span></div>
           <div class="ticket-meta-row" id="metaDueRow"><span class="k">ต้องการภายใน</span><span class="v" id="metaDue">—</span></div>
           <div class="ticket-meta-row"><span class="k">ผู้แจ้ง</span><span class="v wrap" id="metaReporter">—</span></div>
@@ -629,9 +634,7 @@
   };
 
   /* เพิ่ม/ลบจังหวัดได้ที่บรรทัดนี้ */
-  const ALL_PROVINCES = 'ทุกจังหวัด';
   const PROVINCES = [
-    ALL_PROVINCES,
     'เชียงราย','พิษณุโลก','บุรีรัมย์','สุรินทร์','ชลบุรี',
     'ระยอง','อุดรธานี','อุบลราชธานี','ขอนแก่น','ประจวบคีรีขันธ์'
   ];
@@ -662,11 +665,8 @@
     if(!provinces.length){
       btn.textContent = '— เลือกจังหวัด —';
       btn.classList.add('placeholder');
-    }else if(provinces.length <= 2){
-      btn.textContent = provinces.join(', ');
-      btn.classList.remove('placeholder');
     }else{
-      btn.textContent = provinces[0] + ' และอีก ' + (provinces.length - 1) + ' จังหวัด';
+      btn.textContent = provinces[0];
       btn.classList.remove('placeholder');
     }
   }
@@ -683,10 +683,11 @@
 
     PROVINCES.forEach(function(name){
       const row = document.createElement('label');
-      row.className = 'ms-opt' + (name === ALL_PROVINCES ? ' all' : '');
+      row.className = 'ms-opt';
 
       const cb = document.createElement('input');
-      cb.type = 'checkbox';
+      cb.type = 'radio';
+      cb.name = 'province';
       cb.value = name;
 
       const span = document.createElement('span');
@@ -697,19 +698,10 @@
       menu.appendChild(row);
 
       cb.addEventListener('change', function(){
-        const boxes = menu.querySelectorAll('input[type=checkbox]');
-        if(name === ALL_PROVINCES){
-          if(cb.checked){
-            boxes.forEach(function(b){ if(b.value !== ALL_PROVINCES) b.checked = false; });
-          }
-        }else if(cb.checked){
-          boxes.forEach(function(b){ if(b.value === ALL_PROVINCES) b.checked = false; });
-        }
-        provinces = Array.prototype.slice.call(boxes)
-          .filter(function(b){ return b.checked; })
-          .map(function(b){ return b.value; });
+        provinces = cb.checked ? [name] : [];
         renderProvinceToggle();
         updateTicket();
+        menu.classList.remove('show');
       });
     });
 
@@ -774,6 +766,7 @@
   });
   document.getElementById('bugCategory').addEventListener('change', updateTicket);
   document.getElementById('bugSystem').addEventListener('input', updateTicket);
+  document.getElementById('bugUrl').addEventListener('input', updateTicket);
   document.getElementById('product').addEventListener('change', function(){
     refreshCaseId();
     updateTicket();
@@ -811,6 +804,10 @@
     document.getElementById('metaCategory').textContent = bugCategory || '—';
     document.getElementById('metaSystemRow').style.display = (type==='bug' && bugSystem) ? 'flex' : 'none';
     document.getElementById('metaSystem').textContent = bugSystem || '—';
+
+    const bugUrlV = document.getElementById('bugUrl').value.trim();
+    document.getElementById('metaUrlRow').style.display = (type==='bug' && bugUrlV) ? 'flex' : 'none';
+    document.getElementById('metaUrl').textContent = bugUrlV || '—';
 
     document.getElementById('metaProvinceRow').style.display = provinces.length ? 'flex' : 'none';
     document.getElementById('metaProvince').textContent = provinces.join(', ') || '—';
@@ -946,12 +943,13 @@
     const dueDate = document.getElementById('dueDate').value;
     const bugCategory = document.getElementById('bugCategory').value;
     const bugSystem = document.getElementById('bugSystem').value.trim();
+    const bugUrl = document.getElementById('bugUrl').value.trim();
 
     if(type==='bug'){
       if(!bugCategory){ showError('กรุณาเลือกหมวดหมู่ก่อนส่ง'); return; }
     }
     if(!provinces.length){
-      showError('กรุณาเลือกจังหวัดผู้แจ้งก่อนส่ง — ถ้าไม่เกี่ยวกับจังหวัด เลือก "ทุกจังหวัด"');
+      showError('กรุณาเลือกจังหวัดผู้แจ้งก่อนส่ง');
       return;
     }
     if(!title || !desc || !reporter){
@@ -985,6 +983,7 @@
     if(type==='bug'){
       fullDesc += '**หมวดหมู่:** ' + bugCategory + '\n';
       if(bugSystem) fullDesc += '**ระบบที่พบ:** ' + bugSystem + '\n';
+      if(bugUrl) fullDesc += '**URL ที่เจอ Bug:** ' + bugUrl + '\n';
     }
     fullDesc += '**จังหวัดผู้แจ้ง:** ' + provinceLabel + '\n\n';
     fullDesc += '**' + descHeading + '**\n' + desc + '\n\n**แจ้งโดย:** ' + reporter + '\n**วันที่แจ้ง:** ' + new Date().toLocaleDateString('th-TH');
@@ -1033,6 +1032,7 @@
         provinces_label: provinceLabel,
         category: type==='bug' ? bugCategory : null,
         system: (type==='bug' && bugSystem) ? bugSystem : null,
+        bug_url: (type==='bug' && bugUrl) ? bugUrl : null,
         objective: type==='task' ? objective : null,
         due_label: type==='task' ? formatThaiDate(dueDate) : null,
         impact_desc: type==='task' ? impactDesc : null,
@@ -1156,6 +1156,7 @@
     document.getElementById('dueDate').value = '';
     document.getElementById('bugCategory').value = '';
     document.getElementById('bugSystem').value = '';
+    document.getElementById('bugUrl').value = '';
 
     document.getElementById('isCustomer').checked = false;
     isCustomer = false;
