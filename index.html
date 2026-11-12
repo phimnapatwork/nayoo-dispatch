@@ -327,6 +327,155 @@
     background:transparent;color:var(--ink-dim);border:1px solid var(--line);
   }
   .modal-btn.ghost:hover{border-color:var(--teal);color:var(--teal);}
+
+  /* ===== Modern restyle ===== */
+  :root{
+    --bg:#f6f7fb;
+    --bg-field:#f5f6fa;
+    --ink:#161b26;
+    --ink-dim:#586174;
+    --ink-faint:#9aa3b5;
+    --line:#e6e9f0;
+    --teal:#2B8FCB;
+    --teal-dim:#e7f4fc;
+    --amber:#f97316;
+    --amber-dim:#fff1e6;
+    --red:#e5484d;
+    --ok:#27B24D;
+    --shadow-sm:0 1px 2px rgba(22,27,38,.05);
+    --shadow-md:0 2px 4px rgba(22,27,38,.04), 0 12px 32px rgba(22,27,38,.08);
+  }
+  body{
+    background:
+      radial-gradient(900px 420px at 10% -10%, rgba(70,171,226,.10), transparent 60%),
+      radial-gradient(700px 380px at 100% 0%, rgba(249,115,22,.08), transparent 60%),
+      var(--bg);
+    padding:40px 18px 80px;
+  }
+  .wrap{max-width:980px;}
+  .topbar{margin-bottom:30px;align-items:center;}
+  .brand .dot{
+    width:34px;height:34px;border-radius:11px;box-shadow:0 6px 16px rgba(70,171,226,.35);
+    background:linear-gradient(135deg,#46ABE2,#2B8FCB);position:relative;
+  }
+  .brand .dot::after{content:'';position:absolute;inset:7px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 21V10l8-7 8 7v11z'/%3E%3Cpath d='M9 21v-6l3 3 3-3v6'/%3E%3C/svg%3E") center/contain no-repeat;}
+  .brand h1{font-size:19px;font-weight:700;letter-spacing:-0.01em;}
+  .brand span{font-weight:500;}
+  .clock{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;box-shadow:var(--shadow-sm);}
+  .settings-btn{border-radius:999px;padding:7px 13px;box-shadow:var(--shadow-sm);}
+
+  .panel{
+    border-radius:22px;padding:30px;border:1px solid rgba(230,233,240,.9);
+    box-shadow:var(--shadow-md);
+  }
+  .field{margin-bottom:22px;}
+  .field label{font-size:13px;color:var(--ink);font-weight:600;margin-bottom:9px;}
+  input[type=text], input[type=date], textarea, select{
+    background:#fff;border:1.5px solid var(--line);border-radius:12px;
+    padding:12px 14px;box-shadow:var(--shadow-sm);
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  input[type=text]::placeholder, textarea::placeholder{color:#b3bacb;}
+  input[type=text]:hover, input[type=date]:hover, textarea:hover, select:hover{border-color:#d3d8e4;}
+  input[type=text]:focus, input[type=date]:focus, textarea:focus, select:focus{
+    border-color:var(--teal);box-shadow:0 0 0 4px rgba(70,171,226,.13);
+  }
+  .ms-toggle{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:12px 38px 12px 14px;box-shadow:var(--shadow-sm);transition:border-color .15s ease, box-shadow .15s ease;}
+  .ms-toggle:hover{border-color:#d3d8e4;}
+  .ms-toggle:focus-visible{outline:none;border-color:var(--teal);box-shadow:0 0 0 4px rgba(70,171,226,.13);}
+  .ms-menu{border-radius:14px;box-shadow:0 16px 40px rgba(22,27,38,.16);padding:8px;}
+  .ms-opt{border-radius:9px;padding:10px 12px;}
+  .ms-opt:hover{background:var(--teal-dim);}
+  .check-row{background:#fff;border:1.5px solid var(--line);border-radius:12px;box-shadow:var(--shadow-sm);}
+  .check-row.on{background:rgba(229,72,77,.07);}
+  .check-row input{margin:0;flex:none;}
+  .check-row span{line-height:1.2;}
+  .dropzone{border-radius:14px;border:1.5px dashed #d3d8e4;background:#fafbfd;padding:24px 16px;}
+  .thumb{border-radius:12px;}
+  .chip{box-shadow:var(--shadow-sm);}
+
+  .submit-btn,.submit-btn.bug-mode{
+    padding:15px;border-radius:14px;font-size:15.5px;letter-spacing:.01em;
+    background:linear-gradient(135deg,#46ABE2,#2B8FCB);
+    box-shadow:0 10px 24px rgba(70,171,226,.32);
+    transition:transform .12s ease, box-shadow .15s ease, opacity .15s ease;
+  }
+  .submit-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 14px 28px rgba(70,171,226,.38);}
+
+  .ticket{border-radius:22px;border:1px solid rgba(230,233,240,.9);box-shadow:var(--shadow-md);}
+  .ticket-head{background:linear-gradient(135deg,#46ABE2,#2B8FCB);border-bottom:none;color:#fff;padding:22px 24px 20px;}
+  .ticket-kind{color:rgba(255,255,255,.72);}
+  .ticket-id.bug,.ticket-id.task{color:#fff;}
+  .ticket::before,.ticket::after{display:none;}
+  .ticket-body{padding:20px 24px 24px;}
+  .ticket-title{font-size:16px;}
+  .ticket-meta{gap:11px;}
+  .ticket-meta-row{padding-bottom:11px;border-bottom:1px solid #f0f2f7;}
+  .ticket-meta-row:last-child{border-bottom:none;padding-bottom:0;}
+  .ticket-stamp{border-radius:10px;border:1.5px dashed var(--line);}
+  .ticket-stamp.saved{border-style:solid;border-color:var(--ok);color:var(--ok);background:rgba(39,178,77,.08);}
+  .caseid-line span{color:var(--teal);}
+  .modal{border-radius:24px;}
+  .modal-case-value{color:var(--teal);}
+  .modal-btn{border-radius:12px;}
+  .modal-btn.primary{background:linear-gradient(135deg,#46ABE2,#2B8FCB);}
+
+  /* ===== URL field ===== */
+  .url-box{
+    display:flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--line);
+    border-radius:12px;padding:4px 6px 4px 12px;box-shadow:var(--shadow-sm);
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .url-box:hover{border-color:#d3d8e4;}
+  .url-box:focus-within{border-color:var(--teal);box-shadow:0 0 0 4px rgba(70,171,226,.13);}
+  .url-box.ok{border-color:var(--ok);}
+  .url-box.bad{border-color:var(--red);box-shadow:0 0 0 4px rgba(229,72,77,.10);}
+  .url-ico{font-size:15px;opacity:.65;flex:none;}
+  .url-box input[type=text]{
+    border:none;box-shadow:none;background:transparent;padding:9px 4px;min-width:0;flex:1;
+    font-family:var(--font-mono);font-size:13px;
+  }
+  .url-box input[type=text]:focus{box-shadow:none;border:none;}
+  .url-btn{
+    flex:none;border:none;background:var(--teal-dim);color:var(--teal);font-weight:600;
+    font-size:12.5px;padding:8px 12px;border-radius:9px;cursor:pointer;text-decoration:none;
+    font-family:var(--font-display);transition:filter .15s ease;
+  }
+  .url-btn:hover{filter:brightness(.95);}
+  .url-msg{font-size:12px;margin-top:7px;min-height:16px;color:var(--ink-faint);line-height:1.5;}
+  .url-msg.ok{color:var(--ok);}
+  .url-msg.bad{color:var(--red);}
+
+  .step-head{display:flex;align-items:center;gap:12px;margin:30px 0 18px;padding-top:24px;border-top:1px solid var(--line);}
+  .step-head:first-child{margin-top:0;padding-top:0;border-top:none;}
+  .step-no{
+    flex:none;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#46ABE2,#2B8FCB);color:#fff;font-weight:700;font-size:14px;
+    box-shadow:0 6px 14px rgba(70,171,226,.35);
+  }
+  .step-title{font-size:15.5px;font-weight:700;line-height:1.2;}
+  .step-sub{font-size:12px;color:var(--ink-faint);margin-top:2px;}
+  .bugfields > .step-head:first-child{margin-top:30px;padding-top:24px;border-top:1px solid var(--line);}
+
+  .brand{gap:14px;}
+  .brand-logo{height:44px;width:auto;display:block;}
+  .brand-sub{font-size:13px;font-weight:600;color:var(--ink-dim);background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 12px;box-shadow:var(--shadow-sm);}
+
+  .req{font-weight:700;}
+  .form-legend{font-size:12px;color:var(--ink-faint);margin:0 0 18px;display:flex;align-items:center;gap:6px;}
+  .form-legend b{color:var(--red);font-size:14px;line-height:1;}
+  .field label .req{
+    display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:10.5px;line-height:1.5;
+    background:rgba(229,72,77,.10);color:var(--red);font-weight:700;vertical-align:middle;
+  }
+  .field label .req::before{content:'จำเป็น';}
+  .field label .req{font-size:0;}
+  .field label .req::before{font-size:10.5px;}
+  .field.invalid > label{color:var(--red);}
+  .field.invalid input[type=text], .field.invalid textarea, .field.invalid select, .field.invalid .ms-toggle{
+    border-color:var(--red);box-shadow:0 0 0 4px rgba(229,72,77,.10);
+  }
+  .field.invalid::after{content:attr(data-msg);display:block;margin-top:7px;font-size:12px;font-weight:600;color:var(--red);}
 </style>
 </head>
 <body>
@@ -334,10 +483,8 @@
 
   <div class="topbar">
     <div class="brand">
-      <div class="dot" id="statusDot"></div>
-      <div>
-        <h1>น่าอยู่ <span>— แจ้งบัคและแจ้งงาน</span></h1>
-      </div>
+      <img class="brand-logo" src="data:image/png;base64,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" alt="น่าอยู่">
+      <span class="brand-sub">แจ้งบัค</span>
     </div>
     <div class="topbar-right">
       <div class="clock" id="clock"></div>
@@ -365,52 +512,40 @@
 
   <div class="grid">
     <div class="panel">
-      <div class="field">
-        <label>ผู้แจ้ง<span class="req">*</span></label>
+      <div class="form-legend">ช่องที่มีป้าย <span style="color:var(--red);font-weight:700">จำเป็น</span> ต้องกรอกก่อนบันทึก</div>
+      <div class="step-head"><span class="step-no">1</span><div><div class="step-title">ใครแจ้ง</div><div class="step-sub">ระบุชื่อและจังหวัดของคุณ</div></div></div>
+      <div class="row2">
+<div class="field">
+          <label>ชื่อผู้แจ้ง<span class="req">*</span></label>
+          <input type="text" id="reporter" placeholder="ชื่อผู้แจ้ง">
+        </div>
+<div class="field">
+        <label>จังหวัด<span class="req">*</span></label>
         <div class="ms" id="provinceMs">
           <button type="button" class="ms-toggle placeholder" id="provinceToggle">— เลือกจังหวัด —</button>
           <div class="ms-menu" id="provinceMenu"></div>
         </div>
         <div class="field-note">เลือกได้จังหวัดเดียว</div>
       </div>
-
-      <div class="field">
-        <label>ประเภท<span class="req">*</span></label>
-        <div class="seg">
+      </div>
+<div class="field">
+        <div class="seg" style="display:none">
           <button type="button" data-v="bug" class="active">🐛 Bug</button>
           <button type="button" data-v="task">📋 งาน (Task)</button>
         </div>
         <div class="caseid-line" id="caseIdLine">เลข Case: <span id="caseIdValue">—</span></div>
       </div>
 
-      <div class="field">
-        <label class="check-row" id="customerRow">
-          <input type="checkbox" id="isCustomer">
-          <span>งานลูกค้า</span>
-        </label>
-      </div>
-
-      <div class="field">
+      <div class="bugfields show" id="bugFields">
+      <div class="step-head"><span class="step-no">2</span><div><div class="step-title">เจอที่ไหน</div><div class="step-sub">เลือกโปรดักส์ หมวดหมู่ และระบุหน้าที่เจอปัญหา</div></div></div>
+<div class="field">
         <label>โปรดักส์<span class="req">*</span></label>
         <select id="product">
           <option value="nayoo">NaYoo</option>
           <option value="baanprompt">Baan Prompt</option>
         </select>
       </div>
-
-      <div class="field">
-        <label>หัวข้อ<span class="req">*</span></label>
-        <input type="text" id="title" placeholder="เช่น หน้ารายละเอียดประกาศโหลดรูปไม่ขึ้นบนมือถือ">
-      </div>
-
-      <div class="field">
-        <label><span id="descLabelText">รายละเอียด</span><span class="req">*</span></label>
-        <textarea id="desc" placeholder="อธิบายสิ่งที่พบ"></textarea>
-        <div class="field-hint" id="descHint">ยิ่งละเอียด Dev ยิ่งประเมินเวลาได้แม่นและเริ่มงานได้เร็วขึ้น</div>
-      </div>
-
-      <div class="bugfields show" id="bugFields">
-        <div class="row2">
+<div class="row2">
           <div class="field">
             <label>หมวดหมู่<span class="req">*</span></label>
             <select id="bugCategory">
@@ -431,15 +566,44 @@
             </datalist>
           </div>
         </div>
-        <div class="field">
-          <label>URL ที่เจอ Bug</label>
-          <input type="url" id="bugUrl" placeholder="https://...">
+<div class="field">
+          <label>เบราว์เซอร์ / อุปกรณ์ที่พบ</label>
+          <input type="text" id="bugBrowser" list="bugBrowserList" placeholder="เลือกหรือพิมพ์เพิ่ม">
+          <datalist id="bugBrowserList">
+            <option value="Google Chrome">
+            <option value="Safari">
+            <option value="Microsoft Edge">
+            <option value="Firefox">
+            <option value="มือถือ iOS">
+            <option value="มือถือ Android">
+          </datalist>
         </div>
-        <div class="field">
+<div class="field">
+          <label>URL ที่เจอ Bug</label>
+          <div class="url-box" id="urlBox">
+            <span class="url-ico">🔗</span>
+            <input type="text" id="bugUrl" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="วาง URL หน้าที่เจอปัญหา เช่น https://nayoo.co.th/...">
+            <button type="button" class="url-btn" id="urlPaste">วาง</button>
+            <a class="url-btn" id="urlOpen" target="_blank" rel="noopener" style="display:none">เปิด ↗</a>
+          </div>
+          <div class="url-msg" id="urlMsg">ช่วยให้ Dev ตามหาจุดที่เกิดปัญหาได้เร็วขึ้น</div>
+        </div>
+
+      <div class="step-head"><span class="step-no">3</span><div><div class="step-title">เกิดอะไรขึ้น</div><div class="step-sub">เล่าปัญหาให้ Dev เข้าใจได้เร็วที่สุด</div></div></div>
+<div class="field">
+        <label>หัวข้อ<span class="req">*</span></label>
+        <input type="text" id="title" placeholder="เช่น หน้ารายละเอียดประกาศโหลดรูปไม่ขึ้นบนมือถือ">
+      </div>
+<div class="field">
+        <label><span id="descLabelText">รายละเอียด</span><span class="req">*</span></label>
+        <textarea id="desc" placeholder="อธิบายสิ่งที่พบ"></textarea>
+        <div class="field-hint" id="descHint">ยิ่งละเอียด Dev ยิ่งประเมินเวลาได้แม่นและเริ่มงานได้เร็วขึ้น</div>
+      </div>
+<div class="field">
           <label>ขั้นตอนที่ทำให้เกิด (Steps to reproduce)</label>
           <textarea id="steps" placeholder="1) เข้าหน้า...&#10;2) กด...&#10;3) เจอ..."></textarea>
         </div>
-        <div class="row2">
+<div class="row2">
           <div class="field">
             <label>ผลที่ควรเป็น (Expected)</label>
             <input type="text" id="expected" placeholder="ควรจะ...">
@@ -451,17 +615,29 @@
         </div>
       </div>
 
-      <div class="field" id="objectiveField">
-        <label>วัตถุประสงค์<span class="req">*</span></label>
-        <textarea id="objective" placeholder="อยากได้ไปใช้ทำอะไร / ช่วยแก้ปัญหาอะไร"></textarea>
+      <div class="step-head"><span class="step-no">4</span><div><div class="step-title">หลักฐาน</div><div class="step-sub">รูปหน้าจอหรือลิงก์ช่วยให้ตรวจสอบได้ไวขึ้น</div></div></div>
+<div class="field">
+        <label>แนบรูป (ถ้ามี)</label>
+        <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+          <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" onchange="handleFiles(this.files)">
+          <div class="dropzone-text">คลิกเพื่อเลือกรูป หรือลากรูปมาวางตรงนี้</div>
+          <div class="dropzone-hint">รองรับ JPG / PNG / GIF — สูงสุด 3 ไฟล์ ไฟล์ละไม่เกิน 8 MB</div>
+        </div>
+        <div class="thumbs" id="thumbs"></div>
       </div>
+<div class="field">
+          <label>ลิงก์แนบ (ถ้ามี)</label>
+          <input type="text" id="linkAttach" placeholder="ลิงก์รูป/แชท LINE/Drive">
+        </div>
 
-      <div class="field" id="dueDateField">
-        <label>ต้องการภายในวันที่<span class="req">*</span></label>
-        <input type="date" id="dueDate">
+      <div class="step-head"><span class="step-no">5</span><div><div class="step-title">ความเร่งด่วน</div><div class="step-sub">ถ้าเป็นงานของลูกค้า ระบบจะตั้งเป็น Urgent ให้</div></div></div>
+<div class="field">
+        <label class="check-row" id="customerRow">
+          <input type="checkbox" id="isCustomer">
+          <span>งานลูกค้า</span>
+        </label>
       </div>
-
-      <div class="field" id="priorityField">
+<div class="field" id="priorityField">
         <label>ความสำคัญ<span class="req">*</span></label>
         <div class="chips">
           <div class="chip" data-p="1">Urgent</div>
@@ -470,31 +646,19 @@
           <div class="chip" data-p="4">Low</div>
         </div>
       </div>
-
-      <div class="field" id="impactField">
+      <div style="display:none">
+<div class="field" id="objectiveField">
+        <label>วัตถุประสงค์<span class="req">*</span></label>
+        <textarea id="objective" placeholder="อยากได้ไปใช้ทำอะไร / ช่วยแก้ปัญหาอะไร"></textarea>
+      </div>
+<div class="field" id="dueDateField">
+        <label>ต้องการภายในวันที่<span class="req">*</span></label>
+        <input type="date" id="dueDate">
+      </div>
+<div class="field" id="impactField">
         <label>ผลกระทบ<span class="req">*</span></label>
         <textarea id="impactDesc" placeholder="อธิบายผลกระทบ เช่น กระทบกี่คน / ทีมไหน / ระบบไหน"></textarea>
       </div>
-
-      <div class="row2">
-        <div class="field">
-          <label>ชื่อผู้แจ้ง<span class="req">*</span></label>
-          <input type="text" id="reporter" placeholder="ชื่อผู้แจ้ง">
-        </div>
-        <div class="field">
-          <label>ลิงก์แนบ (ถ้ามี)</label>
-          <input type="text" id="linkAttach" placeholder="ลิงก์รูป/แชท LINE/Drive">
-        </div>
-      </div>
-
-      <div class="field">
-        <label>แนบรูป (ถ้ามี)</label>
-        <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
-          <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" onchange="handleFiles(this.files)">
-          <div class="dropzone-text">คลิกเพื่อเลือกรูป หรือลากรูปมาวางตรงนี้</div>
-          <div class="dropzone-hint">รองรับ JPG / PNG / GIF — สูงสุด 3 ไฟล์ ไฟล์ละไม่เกิน 8 MB</div>
-        </div>
-        <div class="thumbs" id="thumbs"></div>
       </div>
 
       <button class="submit-btn" id="submitBtn" onclick="submitTicket()">บันทึกงาน</button>
@@ -513,6 +677,7 @@
           <div class="ticket-meta-row" id="metaProvinceRow"><span class="k">จังหวัด</span><span class="v wrap" id="metaProvince">—</span></div>
           <div class="ticket-meta-row" id="metaCategoryRow"><span class="k">หมวดหมู่</span><span class="v" id="metaCategory">—</span></div>
           <div class="ticket-meta-row" id="metaSystemRow"><span class="k">ระบบที่พบ</span><span class="v" id="metaSystem">—</span></div>
+          <div class="ticket-meta-row" id="metaBrowserRow"><span class="k">เบราว์เซอร์</span><span class="v wrap" id="metaBrowser">—</span></div>
           <div class="ticket-meta-row" id="metaUrlRow"><span class="k">URL</span><span class="v wrap" id="metaUrl">—</span></div>
           <div class="ticket-meta-row" id="metaPriorityRow"><span class="k">ความสำคัญ</span><span class="v" id="metaPriority">High</span></div>
           <div class="ticket-meta-row" id="metaDueRow"><span class="k">ต้องการภายใน</span><span class="v" id="metaDue">—</span></div>
@@ -766,7 +931,53 @@
   });
   document.getElementById('bugCategory').addEventListener('change', updateTicket);
   document.getElementById('bugSystem').addEventListener('input', updateTicket);
-  document.getElementById('bugUrl').addEventListener('input', updateTicket);
+  function normalizeUrl(v){
+    v = (v || '').trim();
+    if(!v) return '';
+    if(!/^[a-z][a-z0-9+.-]*:\/\//i.test(v)) v = 'https://' + v;
+    try{
+      const u = new URL(v);
+      if(u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+      if(u.hostname.indexOf('.') < 0 && u.hostname !== 'localhost') return null;
+      return u.href;
+    }catch(e){ return null; }
+  }
+  function refreshUrlState(){
+    const raw = document.getElementById('bugUrl').value;
+    const box = document.getElementById('urlBox');
+    const msg = document.getElementById('urlMsg');
+    const open = document.getElementById('urlOpen');
+    const n = normalizeUrl(raw);
+    box.classList.toggle('ok', !!n);
+    box.classList.toggle('bad', n === null);
+    msg.classList.toggle('ok', !!n);
+    msg.classList.toggle('bad', n === null);
+    if(!raw.trim()){
+      msg.textContent = 'ช่วยให้ Dev ตามหาจุดที่เกิดปัญหาได้เร็วขึ้น';
+    }else if(n === null){
+      msg.textContent = 'URL ไม่ถูกต้อง — ตัวอย่าง https://nayoo.co.th/project/123';
+    }else{
+      msg.textContent = '✓ URL ถูกต้อง';
+    }
+    open.style.display = n ? '' : 'none';
+    if(n) open.href = n;
+  }
+  document.getElementById('bugUrl').addEventListener('input', function(){ refreshUrlState(); updateTicket(); });
+  document.getElementById('bugUrl').addEventListener('blur', function(){
+    const n = normalizeUrl(this.value);
+    if(n){ this.value = n; refreshUrlState(); updateTicket(); }
+  });
+  document.getElementById('urlPaste').addEventListener('click', function(){
+    const el = document.getElementById('bugUrl');
+    if(navigator.clipboard && navigator.clipboard.readText){
+      navigator.clipboard.readText().then(function(t){
+        el.value = (t || '').trim();
+        el.dispatchEvent(new Event('input'));
+        el.dispatchEvent(new Event('blur'));
+      }).catch(function(){ el.focus(); });
+    }else{ el.focus(); }
+  });
+  document.getElementById('bugBrowser').addEventListener('input', updateTicket);
   document.getElementById('product').addEventListener('change', function(){
     refreshCaseId();
     updateTicket();
@@ -805,6 +1016,9 @@
     document.getElementById('metaSystemRow').style.display = (type==='bug' && bugSystem) ? 'flex' : 'none';
     document.getElementById('metaSystem').textContent = bugSystem || '—';
 
+    const bugBrowserV = document.getElementById('bugBrowser').value.trim();
+    document.getElementById('metaBrowserRow').style.display = (type==='bug' && bugBrowserV) ? 'flex' : 'none';
+    document.getElementById('metaBrowser').textContent = bugBrowserV || '—';
     const bugUrlV = document.getElementById('bugUrl').value.trim();
     document.getElementById('metaUrlRow').style.display = (type==='bug' && bugUrlV) ? 'flex' : 'none';
     document.getElementById('metaUrl').textContent = bugUrlV || '—';
@@ -909,6 +1123,13 @@
     });
   })();
 
+  document.querySelector('.panel').addEventListener('input', clearInvalid);
+  document.querySelector('.panel').addEventListener('change', clearInvalid);
+  document.querySelector('.panel').addEventListener('click', clearInvalid);
+  function clearInvalid(e){
+    const f = e.target.closest && e.target.closest('.field.invalid');
+    if(f) f.classList.remove('invalid');
+  }
   function showError(msg){
     const box = document.getElementById('errBox');
     box.textContent = msg;
@@ -943,18 +1164,34 @@
     const dueDate = document.getElementById('dueDate').value;
     const bugCategory = document.getElementById('bugCategory').value;
     const bugSystem = document.getElementById('bugSystem').value.trim();
-    const bugUrl = document.getElementById('bugUrl').value.trim();
+    const bugUrlRaw = document.getElementById('bugUrl').value.trim();
+    const bugUrl = normalizeUrl(bugUrlRaw);
+    const bugBrowser = document.getElementById('bugBrowser').value.trim();
 
-    if(type==='bug'){
-      if(!bugCategory){ showError('กรุณาเลือกหมวดหมู่ก่อนส่ง'); return; }
+    document.querySelectorAll('.field.invalid').forEach(function(f){ f.classList.remove('invalid'); });
+    const missing = [];
+    function need(ok, id, label){
+      if(ok) return;
+      const f = document.getElementById(id).closest('.field');
+      f.classList.add('invalid');
+      f.setAttribute('data-msg', 'กรุณา' + label);
+      missing.push({ el: f, label: label });
     }
-    if(!provinces.length){
-      showError('กรุณาเลือกจังหวัดผู้แจ้งก่อนส่ง');
+    need(!!reporter, 'reporter', 'กรอกชื่อผู้แจ้ง');
+    need(provinces.length > 0, 'provinceMs', 'เลือกจังหวัด');
+    need(!!product, 'product', 'เลือกโปรดักส์');
+    need(!!bugCategory, 'bugCategory', 'เลือกหมวดหมู่');
+    need(!!title, 'title', 'กรอกหัวข้อ');
+    need(!!desc, 'desc', 'กรอกรายละเอียด');
+    if(missing.length){
+      showError('ยังกรอกไม่ครบ ' + missing.length + ' ช่อง — ดูช่องที่ขึ้นสีแดง');
+      missing[0].el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
-    if(!title || !desc || !reporter){
-      const descName = type==='bug' ? DESC_LABEL.bug : DESC_LABEL.task;
-      showError('กรุณากรอกหัวข้อ ' + descName + ' และชื่อผู้แจ้ง ให้ครบก่อนส่ง');
+    if(bugUrl === null){
+      const f = document.getElementById('bugUrl').closest('.field');
+      f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showError('URL ที่เจอ Bug ไม่ถูกต้อง — ตรวจสอบอีกครั้ง หรือเว้นว่างไว้');
       return;
     }
     if(type==='task'){
@@ -983,6 +1220,7 @@
     if(type==='bug'){
       fullDesc += '**หมวดหมู่:** ' + bugCategory + '\n';
       if(bugSystem) fullDesc += '**ระบบที่พบ:** ' + bugSystem + '\n';
+      if(bugBrowser) fullDesc += '**เบราว์เซอร์/อุปกรณ์ที่พบ:** ' + bugBrowser + '\n';
       if(bugUrl) fullDesc += '**URL ที่เจอ Bug:** ' + bugUrl + '\n';
     }
     fullDesc += '**จังหวัดผู้แจ้ง:** ' + provinceLabel + '\n\n';
@@ -1033,6 +1271,7 @@
         category: type==='bug' ? bugCategory : null,
         system: (type==='bug' && bugSystem) ? bugSystem : null,
         bug_url: (type==='bug' && bugUrl) ? bugUrl : null,
+        browser: (type==='bug' && bugBrowser) ? bugBrowser : null,
         objective: type==='task' ? objective : null,
         due_label: type==='task' ? formatThaiDate(dueDate) : null,
         impact_desc: type==='task' ? impactDesc : null,
@@ -1157,6 +1396,8 @@
     document.getElementById('bugCategory').value = '';
     document.getElementById('bugSystem').value = '';
     document.getElementById('bugUrl').value = '';
+    refreshUrlState();
+    document.getElementById('bugBrowser').value = '';
 
     document.getElementById('isCustomer').checked = false;
     isCustomer = false;
